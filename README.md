@@ -15,6 +15,7 @@
        ../Desktop> cd group7/scrum_acers_backend
 ### 2. Create your .env file to store DB Connection information and other private api keys or directly add your db information in index.js file (Not suggested unless testing on local machine)
 ### 3. Thereafter, run following commands
+       ../Desktop/group7/scrum_acers_backend> npm install
        ../Desktop/group7/scrum_acers_backend> node index.js
        
 Voila! Your backend application is now live on your localhost :tada:
