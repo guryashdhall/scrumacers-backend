@@ -9,6 +9,8 @@
   "author": "Group 7",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.2"
+    "express": "^4.17.2",
+    "lodash": "^4.17.21",
+    "mysql": "^2.18.1"
   }
 }
