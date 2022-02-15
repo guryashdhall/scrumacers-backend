@@ -1,6 +1,9 @@
 const express = require('express');
 const mysql = require('mysql');
-const app = express();
+var cors = require("cors");
+var app = express();
+app.use(express.json());
+app.use(cors());
 const util = require("util");
 
 const userroutes = require("./src/user/user.routes");
