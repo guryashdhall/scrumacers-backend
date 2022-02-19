@@ -34,8 +34,9 @@ app.use("/api/user", userroutes);
 app.get('/', function (req, res) {
   res.send('Hello World!');
 });
-app.listen(3000, function () {
-  console.log('Example app listening on port 3000!');
+const port=process.env.PORT || 4000;
+app.listen(port, function () {
+  console.log('Scrum Acers Backend app listening on port '+port);
 });
 
 module.exports=app;
