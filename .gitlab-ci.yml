@@ -8,6 +8,8 @@ backend-build:
   type: deploy
   stage: backend-build
   image: ruby:latest
+  only:
+    - development
   script:
     - apt-get update -qy
     - apt-get install -y ruby-dev
@@ -16,6 +18,8 @@ backend-build:
 
 backend-test:
   stage: backend-test
+  only:
+    - development
   script: 
     - npm install
     - npm test
