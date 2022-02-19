@@ -1,0 +1,21 @@
+image: node:latest
+
+stages:
+  - backend-build
+  - backend-test
+
+backend-build:
+  type: deploy
+  stage: backend-build
+  image: ruby:latest
+  script:
+    - apt-get update -qy
+    - apt-get install -y ruby-dev
+    - gem install dpl
+    - dpl --provider=heroku --app=$HEROKU_APP_BACKEND --api-key=$HEROKU_API_KEY
+
+backend-test:
+  stage: backend-test
+  script: 
+    - npm install
+    - npm test
