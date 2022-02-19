@@ -1,8 +1,0 @@
-# Dependency directory
-node_modules/
-
-# Environment variables file
-.env
-
-# Output
-dist

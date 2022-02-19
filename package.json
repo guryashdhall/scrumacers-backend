@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start":"node index.js",
+    "test": "mocha ./test/* --exit"
   },
   "author": "Group 7",
   "license": "ISC",
@@ -13,6 +14,8 @@
     "express": "^4.17.2",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
-    "mysql": "^2.18.1"
+    "mocha": "^9.2.0",
+    "mysql": "^2.18.1",
+    "supertest": "^6.2.2"
   }
 }
