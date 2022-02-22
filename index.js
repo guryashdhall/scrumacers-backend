@@ -60,7 +60,7 @@ app.use("/api/user", userroutes);
 app.get('/', function (req, res) {
   res.send('Hello World!');
 });
-const port = process.env.PORT || 4100;
+const port = process.env.PORT || 4000;
 app.listen(port, function () {
   console.log('Scrum Acers Backend app listening on port ' + port);
 });
