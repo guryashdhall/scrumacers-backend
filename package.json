@@ -16,7 +16,7 @@
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
     "mocha": "^9.2.0",
-    "mysql": "^2.18.1",
+    "promise-mysql": "^5.1.0",
     "supertest": "^6.2.2"
   }
 }

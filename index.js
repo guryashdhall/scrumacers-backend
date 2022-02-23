@@ -5,6 +5,7 @@ var app = express();
 app.use(express.json());
 app.use(cors());
 const util = require("util");
+const {createDBConnection} = require("./database_connection")
 
 const userroutes = require("./src/user/user.routes");
 
@@ -22,7 +23,6 @@ const userroutes = require("./src/user/user.routes");
 //   database: "CSCI5308_7_DEVINT",
 //   port: "3306",
 // }
-global.conn=require("./database_connection");
 // function connect(db_credentials) {
 //   // try {
 //     console.log("Hi");
@@ -42,7 +42,16 @@ global.conn=require("./database_connection");
 // }
 
 // connect(db_credentials);
-global.connection=require('./database_connection')
+
+let db_credentials={
+  host: "db-5308.cs.dal.ca",
+  user: "CSCI5308_7_DEVINT_USER",
+  password: "thu8oLahcoo3xaok",
+  database: "CSCI5308_7_DEVINT",
+  port: "3306"
+}
+
+global.connection=createDBConnection(db_credentials)
 
 //export const query = util.promisify(connection.query).bind(connection);
 

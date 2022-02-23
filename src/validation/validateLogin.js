@@ -2,6 +2,7 @@ const general_val=require('./general');
 function validateLogin(data){
     let error=new Error();
     error.status=400;
+    console.log(data)
     if(data.email=="" || data.email==" "){
         error.message="Email is empty";
         throw error;

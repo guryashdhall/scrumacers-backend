@@ -11,7 +11,6 @@ describe("Testing of user data", () => {
     it("Testing for empty email by user", () => {
       data.email = ""
       assert.throws(function() { validate_login.validateLogin(data) }, /^Error: Email is empty$/);
-      // expect(function () { validate_login.validateLogin(data) }).toThrow(new Error("Email is invalid"));
     })
     it("Testing for invalid email by user", () => {
       data.email = "dvgmail.com"
