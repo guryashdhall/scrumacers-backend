@@ -1,5 +1,6 @@
 /* eslint-disable no-undef */
 const jwt = require("jsonwebtoken");
+const query_var=require("../../index");
 
 const isAuthenticated = (req, res, next) => {
   let token = req.get("Authorization");
@@ -7,8 +8,7 @@ const isAuthenticated = (req, res, next) => {
     if (token) {
       // Remove Bearer from string
       token = token.slice(7);
-      console.log(token);
-      jwt.verify(token, "afgps7", async (err, decoded) => {
+      jwt.verify(token, "nph101", async (err, decoded) => {
         if (err) {
           return res.status(401).json({
             data: false,
@@ -16,29 +16,20 @@ const isAuthenticated = (req, res, next) => {
             status: false,
           });
         } else {
-          console.log(decoded);
           req.decoded = decoded;
-          console.log("req.decoded")
-          await connection.query(
-            `select * from employee where emp_id=${req.decoded.result.emp_id}`
-            , (err, data) => {
-              if (err) {
-                err.Messaage = "something went wrong";
-                err.status = 400;
-                return new Error(err);
-              }
-              if (data[0]) {
-                req.employee = data;
-                next();
-              }
-              else {
-                return res.status(404).json({
-                  data: false,
-                  message: `User not found`,
-                  status: false,
-                });
-              }
+          const user = await query_var.query(
+            `select * from user_info where id=${req.decoded.result.id}`
+          );
+          if (user[0]) {
+            req.user = user;
+            next();
+          } else {
+            return res.status(404).json({
+              data: false,
+              message: `User not found`,
+              status: false,
             });
+          }
         }
       });
     } else {
@@ -58,4 +49,4 @@ const isAuthenticated = (req, res, next) => {
   }
 };
 
-module.exports = { isAuthenticated }
+module.exports = {isAuthenticated}
