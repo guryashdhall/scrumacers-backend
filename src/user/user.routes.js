@@ -6,5 +6,6 @@ const authentication = require("../auth/authentication") // To use function auth
 router.post("/signup", functions.create_employee);
 router.post("/login", functions.login);
 router.get("/profile", authentication.isAuthenticated, functions.profile);
+router.get("/leavesInformation/:id", functions.leavesGet);
 
 module.exports = router;
