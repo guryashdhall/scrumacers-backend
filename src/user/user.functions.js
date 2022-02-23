@@ -72,9 +72,11 @@ const login = async (req, res) => {
           });
           await connection.query(`update employee set authentication_token='${auth_token}' where emp_id='${data[0].emp_id}';`, (err, data1) => {
             if (err) {
-              let error = new Error("something went wrong");
-              error.status = 400;
-              throw error;
+              return res.status(400).json({
+                data: false,
+                message: err,
+                status: false
+              })
             };
             if (data1.affectedRows) {
               return res.status(200).json({
@@ -87,16 +89,23 @@ const login = async (req, res) => {
             }
             return res.status(400).json({
               data: false,
-              message: "something went wrong",
-              status: false,
+              message: "Data not updated in DB",
+              status: true,
             });
           });
         }
+        return res.status(400).json({
+          data: false,
+          message: "Invalid password",
+          status: false
+        })
       }
+      return res.status(400).json({ message: "Employee not found", status: false, data: false });
     });
   } catch (e) {
     console.log(e);
-    return res.json({ "error_status": e.status, "error_message": e.message })
+    // return res.json({ "error_status": e.status, "error_message": e.message })
+    return res.status(400).json({ data: false, message: 'fail', status: false });
   }
 };
 
