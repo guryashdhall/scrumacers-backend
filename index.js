@@ -51,7 +51,7 @@ let db_credentials={
   port: "3306"
 }
 
-global.connection=createDBConnection(db_credentials)
+createDBConnection(db_credentials)
 
 //export const query = util.promisify(connection.query).bind(connection);
 

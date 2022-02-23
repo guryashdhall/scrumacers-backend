@@ -123,4 +123,26 @@ const profile = async (req, res) => {
   }
 }
 
-module.exports = { login, create_employee, profile }
+const leavesGet = async (req, res) => {
+  try {
+    await connection.query(`select emp_id as team_leader_emp_id, first_name,last_name,email from employee where emp_id=(select team_leader from employee a,team b where emp_id=${req.params.id} and a.team_id=b.team_id);`, (err, data) => {
+      if (err) {
+        let error = new Error("Error fetching employee profile");
+        error.status = 400;
+        throw error;
+      }
+      else if (data.length) {
+        return res.status(200).json({
+          data,
+          message: "Data fetched",
+          status: true
+        })
+      }
+    })
+  } catch (e) {
+    console.log(e)
+    return res.status(400).json({ data: false, message: "fail", status: false })
+  }
+}
+
+module.exports = { login, create_employee, profile, leavesGet }
