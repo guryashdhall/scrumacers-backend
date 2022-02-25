@@ -7,5 +7,7 @@ router.post("/signup", functions.create_employee);
 router.post("/login", functions.login);
 router.get("/profile", authentication.isAuthenticated, functions.profile);
 router.get("/leavesInformation/:id", functions.leavesGet);
+router.post("/dailyStandUpForm",authentication.isAuthenticated,functions.dailystandupform);
+router.get("/fetchStandupForm",authentication.isAuthenticated,functions.fetchStandupForm);
 
 module.exports = router;
