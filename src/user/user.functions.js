@@ -1,7 +1,7 @@
 const validate_login = require('../validation/validateLogin');
+const validate_standup_form = require('../validation/validate_scrum_form');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
-
 // Code that could be  used in future.
 const create_employee = async (req, res) => {
   try {
@@ -18,6 +18,66 @@ const create_employee = async (req, res) => {
       .json({ data: false, message: `fail`, status: false });
   }
 };
+
+//Function to create daily stand up form
+const dailystandupform=async(req,res) =>{
+  let e=new Error()
+try {
+  validate_standup_form.validate_scrum_form(req.body);
+  await connection.query(`INSERT INTO  CSCI5308_7_DEVINT.scrum_form (team_id, employee_id, ques_1, ques_2, ques_3)
+  values(${req.employee[0].team_id},${req.employee[0].emp_id}, "${req.body.q1}","${req.body.q2}",
+  "${req.body.q3}");`,(err,data)=>{
+    if(err){
+      e.message="something went wrong";
+      e.status=400;
+      throw e;
+    } else if(data.affectedRows){
+      console.log(data);
+      return res.status(200).json({data:true,message:"Form Submitted Successfully", status:true})
+    }
+    else{
+      return res.status(400).json({data:false, message:"Form not inserted", status:true})
+    }
+  })
+
+  
+} catch (e) {
+  console.log(`Error: `, e);
+    return res
+      .status(400)
+      .json({ data: false, message: `fail`, status: false });
+  
+}
+}
+
+// To fetch the details of stand up form filled by an employee
+const fetchStandupForm=async(req,res) =>{
+  let e=new Error()
+try {
+  await connection.query(`SELECT * FROM  CSCI5308_7_DEVINT.scrum_form WHERE employee_id = ${req.employee[0].emp_id} 
+  and DATE(creation_timestamp) = CURDATE();`,(err,data)=>{
+    if(err){
+      e.message="something went wrong";
+      e.status=400;
+      throw e;
+    } else if(data.length){
+      console.log(data);
+      return res.status(200).json({data,message:"Form fetched Successfully", status:true})
+    }
+    else{
+      return res.status(400).json({data:false, message:"Form not found for today", status:true})
+    }
+  })
+
+  
+} catch (e) {
+  console.log(`Error: `, e);
+    return res
+      .status(400)
+      .json({ data: false, message: `fail`, status: false });
+  
+}
+}
 
 // const login = async (req, res) => {
 //   const { isValid, errorMessage } = validate_login.validateLogin(req.body);
@@ -277,4 +337,4 @@ const leavesRequest = async (req, res) => {
   }
 }
 
-module.exports = { login, create_employee, profile, leavesGet, leavesRequest , leavesRaised, leavesRequestsReceived, leavesApproveReject}
+module.exports = { login, create_employee, profile, leavesGet, leavesRequest , leavesRaised, leavesRequestsReceived, leavesApproveReject, dailystandupform, fetchStandupForm }
