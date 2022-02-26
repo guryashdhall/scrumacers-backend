@@ -115,7 +115,7 @@ try {
 const login = async (req, res) => {
   try {
     validate_login.validateLogin(req.body);
-    await connection.query(`select emp_id,email,password FROM employee where email='${req.body.email}';`, async (err, data) => {
+    await connection.query(`select * FROM employee where email='${req.body.email}';`, async (err, data) => {
       if (err) {
         return res.status(400).json({
           data: false,
@@ -140,7 +140,7 @@ const login = async (req, res) => {
             };
             if (data1.affectedRows) {
               return res.status(200).json({
-                data: true,
+                data,
                 message: "login successfully",
                 token: auth_token,
                 status: true,

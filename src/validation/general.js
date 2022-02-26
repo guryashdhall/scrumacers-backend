@@ -57,7 +57,8 @@ function notUndefined(val) {
 
 // Validate Email Format.
 function validateEmail(val) {
-  var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+  // var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+  var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
   return emailPattern.test(val);
 }
 
