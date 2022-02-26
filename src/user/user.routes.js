@@ -9,5 +9,7 @@ router.get("/profile", authentication.isAuthenticated, functions.profile);
 router.get("/leavesInformation", authentication.isAuthenticated, functions.leavesGet);
 router.get("/leavesRaised", authentication.isAuthenticated, functions.leavesRaised);
 router.post("/leaveRequest", authentication.isAuthenticated, functions.leavesRequest);
+router.get("/leavesRequestsReceived", authentication.isAuthenticated, functions.leavesRequestsReceived);
+router.put("/leavesApproveReject", authentication.isAuthenticated, functions.leavesApproveReject);
 
 module.exports = router;
