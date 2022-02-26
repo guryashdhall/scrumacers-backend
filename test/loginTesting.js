@@ -29,7 +29,7 @@ describe("POST api/user/login", () => {
   })
   it("Testing for required password length", () => {
     data.password = "abc"
-    assert.throws(function () { validate_login.validateLogin(data) }, /^Error: Password length should be atleast 4$/);
+    assert.throws(function () { validate_login.validateLogin(data) }, /^Error: Password length should be atleast 8$/);
   })
   it("Testing for wrong user/employee", (done) => {
     data.email = "a@gmail.com";
