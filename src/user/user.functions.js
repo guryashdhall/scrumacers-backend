@@ -217,7 +217,7 @@ const leavesGet = async (req, res) => {
     })
   } catch (e) {
     console.log(e)
-    return res.status(400).json({ data: false, message: "fail", status: false })
+    return res.status(400).json({ data: false, message: "Request Failed", status: false })
   }
 }
 
@@ -246,7 +246,65 @@ const leavesRaised = async (req,res) => {
     })
   } catch (e) {
     console.log(e)
-    return res.status(400).json({ data: false, message: "fail", status: false })
+    return res.status(400).json({ data: false, message: "Request Failed", status: false })
+  }
+}
+
+const leavesRequestsReceived = async (req,res) => {
+  try {
+    await connection.query(`select * from leave_information where manager_id=${req.employee[0].emp_id}`, (err, data) => {
+      if (err) {
+        let error = new Error("Error fetching employees leave requests");
+        error.status = 400;
+        throw error;
+      }
+      else if (data.length) {
+        return res.status(200).json({
+          data,
+          message: "Data fetched",
+          status: true
+        })
+      }
+      else {
+        return res.status(400).json({
+          data: false,
+          message: 'No leave requests found',
+          status: true
+        })
+      }
+    })
+  } catch (e) {
+    console.log(e)
+    return res.status(400).json({ data: false, message: "Request Failed", status: false })
+  }
+}
+
+const leavesApproveReject = async (req,res) => {
+  try {
+    await connection.query(`update leave_information set status='${req.body.status}' where leave_id='${req.body.leaveId}'`, (err, data) => {
+      if (err) {
+        let error = new Error(`Error updating leave id ${req.body.leaveId}`);
+        error.status = 400;
+        throw error;
+      }
+      else if (data.affectedRows) {
+        return res.status(200).json({
+          data,
+          message: "Data Updated",
+          status: true
+        })
+      }
+      else {
+        return res.status(400).json({
+          data: false,
+          message: 'Leave Id not found',
+          status: true
+        })
+      }
+    })
+  } catch (e) {
+    console.log(e)
+    return res.status(400).json({ data: false, message: "Request Failed", status: false })
   }
 }
 
@@ -275,8 +333,8 @@ const leavesRequest = async (req, res) => {
     })
   } catch (e) {
     console.log(e)
-    return res.status(400).json({ data: false, message: "fail", status: false })
+    return res.status(400).json({ data: false, message: "Request Failed", status: false })
   }
 }
 
-module.exports = { login, create_employee, profile, leavesGet, leavesRequest , leavesRaised,dailystandupform,fetchStandupForm }
+module.exports = { login, create_employee, profile, leavesGet, leavesRequest , leavesRaised, leavesRequestsReceived, leavesApproveReject, dailystandupform, fetchStandupForm }
