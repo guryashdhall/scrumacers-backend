@@ -63,11 +63,9 @@ createDBConnection(db_credentials)
 //   }
 //   console.log("Connected to the MySQL server.");
 // });
-try{
-  app.use("/api/user", userroutes);
-}catch(e){
-  console.log(e)
-}
+
+app.use("/api/user", userroutes);
+
 app.get('/', function (req, res) {
   res.send('Hello World!');
 });
