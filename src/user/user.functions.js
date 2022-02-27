@@ -223,7 +223,7 @@ const leavesGet = async (req, res) => {
 
 const leavesRaised = async (req,res) => {
   try {
-    await connection.query(`select * from leave_information where employee_id=${req.employee[0].emp_id}`, (err, data) => {
+    await connection.query(`select * from leave_information where employee_id=${req.employee[0].emp_id} order by leave_apply_date desc`, (err, data) => {
       if (err) {
         let error = new Error("Error fetching employee's leaves");
         error.status = 400;
@@ -252,7 +252,7 @@ const leavesRaised = async (req,res) => {
 
 const leavesRequestsReceived = async (req,res) => {
   try {
-    await connection.query(`select * from leave_information where manager_id=${req.employee[0].emp_id}`, (err, data) => {
+    await connection.query(`select * from leave_information where manager_id=${req.employee[0].emp_id} order by leave_apply_date desc`, (err, data) => {
       if (err) {
         let error = new Error("Error fetching employees leave requests");
         error.status = 400;
@@ -268,7 +268,7 @@ const leavesRequestsReceived = async (req,res) => {
       else {
         return res.status(400).json({
           data: false,
-          message: 'No leave requests found',
+          message: 'No leave approval requests found',
           status: true
         })
       }
@@ -281,18 +281,58 @@ const leavesRequestsReceived = async (req,res) => {
 
 const leavesApproveReject = async (req,res) => {
   try {
-    await connection.query(`update leave_information set status='${req.body.status}' where leave_id='${req.body.leaveId}'`, (err, data) => {
+    await connection.query(`update leave_information set status='${req.body.status}' where leave_id='${req.body.leaveId}'`, async (err, data) => {
       if (err) {
         let error = new Error(`Error updating leave id ${req.body.leaveId}`);
         error.status = 400;
         throw error;
       }
       else if (data.affectedRows) {
-        return res.status(200).json({
-          data,
-          message: "Data Updated",
-          status: true
-        })
+        req.body.leave_start_date=req.body.leave_start_date.replaceAll("-","/")
+        req.body.leave_end_date=req.body.leave_end_date.replaceAll("-","/")
+        let date=new Date(req.body.leave_start_date)
+        let date2=new Date(req.body.leave_end_date)
+        let days=(date2.getTime()-date.getTime())/ (1000 * 3600 * 24)
+        if(req.body.status==='approved'){
+          await connection.query(`update employee set num_of_leaves=num_of_leaves-${days} where emp_id='${req.body.employee_id}';`, (err2, data2) => {
+            if (err2) {
+              console.log(err2)
+              let error = new Error("Failed to deduct employee's leaves");
+              error.status = 400;
+              throw error;
+            }
+            else if (data2.affectedRows) {
+              return res.status(200).json({
+                data2,
+                message: "Data Updated",
+                status: true
+              })
+            }
+            else {
+              return res.status(400).json({
+                data: false,
+                message: 'Failed to find employee',
+                status: true
+              })
+            }
+          })
+        }
+        else{
+          if (data.affectedRows) {
+            return res.status(200).json({
+              data,
+              message: "Data Updated",
+              status: true
+            })
+          }
+          else {
+            return res.status(400).json({
+              data: false,
+              message: 'Failed to find leave id',
+              status: true
+            })
+          }
+        }
       }
       else {
         return res.status(400).json({
