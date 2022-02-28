@@ -3,7 +3,13 @@ const express = require('express');
 var cors = require("cors");
 var app = express();
 app.use(express.json());
-app.use(cors());
+const corsOptions ={
+  origin:'*', 
+  credentials:true,            //access-control-allow-credentials:true
+  optionSuccessStatus:200,
+}
+
+app.use(cors(corsOptions))
 const util = require("util");
 
 const userroutes = require("./src/user/user.routes");
