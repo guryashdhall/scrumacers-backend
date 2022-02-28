@@ -1,7 +1,7 @@
 const validate_login = require('../validation/validateLogin');
+const validate_standup_form = require('../validation/validate_scrum_form');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
-
 // Code that could be  used in future.
 const create_employee = async (req, res) => {
   try {
@@ -18,6 +18,66 @@ const create_employee = async (req, res) => {
       .json({ data: false, message: `fail`, status: false });
   }
 };
+
+//Function to create daily stand up form
+const dailystandupform=async(req,res) =>{
+  let e=new Error()
+try {
+  validate_standup_form.validate_scrum_form(req.body);
+  await connection.query(`INSERT INTO  CSCI5308_7_DEVINT.scrum_form (team_id, employee_id, ques_1, ques_2, ques_3)
+  values(${req.employee[0].team_id},${req.employee[0].emp_id}, "${req.body.q1}","${req.body.q2}",
+  "${req.body.q3}");`,(err,data)=>{
+    if(err){
+      e.message="something went wrong";
+      e.status=400;
+      throw e;
+    } else if(data.affectedRows){
+      console.log(data);
+      return res.status(200).json({data:true,message:"Form Submitted Successfully", status:true})
+    }
+    else{
+      return res.status(400).json({data:false, message:"Form not inserted", status:true})
+    }
+  })
+
+  
+} catch (e) {
+  console.log(`Error: `, e);
+    return res
+      .status(400)
+      .json({ data: false, message: `fail`, status: false });
+  
+}
+}
+
+// To fetch the details of stand up form filled by an employee
+const fetchStandupForm=async(req,res) =>{
+  let e=new Error()
+try {
+  await connection.query(`SELECT * FROM  CSCI5308_7_DEVINT.scrum_form WHERE employee_id = ${req.employee[0].emp_id} 
+  and DATE(creation_timestamp) = CURDATE();`,(err,data)=>{
+    if(err){
+      e.message="something went wrong";
+      e.status=400;
+      throw e;
+    } else if(data.length){
+      console.log(data);
+      return res.status(200).json({data,message:"Form fetched Successfully", status:true})
+    }
+    else{
+      return res.status(400).json({data:false, message:"Form not found for today", status:true})
+    }
+  })
+
+  
+} catch (e) {
+  console.log(`Error: `, e);
+    return res
+      .status(400)
+      .json({ data: false, message: `fail`, status: false });
+  
+}
+}
 
 // const login = async (req, res) => {
 //   const { isValid, errorMessage } = validate_login.validateLogin(req.body);
@@ -55,7 +115,7 @@ const create_employee = async (req, res) => {
 const login = async (req, res) => {
   try {
     validate_login.validateLogin(req.body);
-    await connection.query(`select emp_id,email,password FROM employee where email='${req.body.email}';`, async (err, data) => {
+    await connection.query(`select * FROM employee where email='${req.body.email}';`, async (err, data) => {
       if (err) {
         return res.status(400).json({
           data: false,
@@ -72,13 +132,15 @@ const login = async (req, res) => {
           });
           await connection.query(`update employee set authentication_token='${auth_token}' where emp_id='${data[0].emp_id}';`, (err, data1) => {
             if (err) {
-              let error = new Error("something went wrong");
-              error.status = 400;
-              throw error;
+              return res.status(400).json({
+                data: false,
+                message: err,
+                status: false
+              })
             };
             if (data1.affectedRows) {
               return res.status(200).json({
-                data: true,
+                data,
                 message: "login successfully",
                 token: auth_token,
                 status: true,
@@ -87,16 +149,23 @@ const login = async (req, res) => {
             }
             return res.status(400).json({
               data: false,
-              message: "something went wrong",
-              status: false,
+              message: "Data not updated in DB",
+              status: true,
             });
           });
         }
+        return res.status(400).json({
+          data: false,
+          message: "Invalid password",
+          status: false
+        })
       }
+      return res.status(400).json({ message: "Employee not found", status: false, data: false });
     });
   } catch (e) {
     console.log(e);
-    return res.json({ "error_status": e.status, "error_message": e.message })
+    // return res.json({ "error_status": e.status, "error_message": e.message })
+    return res.status(400).json({ data: false, message: 'fail', status: false });
   }
 };
 
@@ -123,4 +192,189 @@ const profile = async (req, res) => {
   }
 }
 
-module.exports = { login, create_employee, profile }
+const leavesGet = async (req, res) => {
+  try {
+    await connection.query(`select emp_id as team_leader_emp_id, first_name,last_name,email from employee where emp_id=(select team_leader from employee a,team b where emp_id=${req.employee[0].emp_id} and a.team_id=b.team_id);`, (err, data) => {
+      if (err) {
+        let error = new Error("Error fetching employee's leader");
+        error.status = 400;
+        throw error;
+      }
+      else if (data.length) {
+        return res.status(200).json({
+          data,
+          message: "Data fetched",
+          status: true
+        })
+      }
+      else {
+        return res.status(400).json({
+          data: false,
+          message: 'No team leader information found',
+          status: true
+        })
+      }
+    })
+  } catch (e) {
+    console.log(e)
+    return res.status(400).json({ data: false, message: "Request Failed", status: false })
+  }
+}
+
+const leavesRaised = async (req,res) => {
+  try {
+    await connection.query(`select * from leave_information where employee_id=${req.employee[0].emp_id} order by leave_apply_date desc`, (err, data) => {
+      if (err) {
+        let error = new Error("Error fetching employee's leaves");
+        error.status = 400;
+        throw error;
+      }
+      else if (data.length) {
+        return res.status(200).json({
+          data,
+          message: "Data fetched",
+          status: true
+        })
+      }
+      else {
+        return res.status(400).json({
+          data: false,
+          message: 'No leave requests found',
+          status: true
+        })
+      }
+    })
+  } catch (e) {
+    console.log(e)
+    return res.status(400).json({ data: false, message: "Request Failed", status: false })
+  }
+}
+
+const leavesRequestsReceived = async (req,res) => {
+  try {
+    await connection.query(`select * from leave_information where manager_id=${req.employee[0].emp_id} order by leave_apply_date desc`, (err, data) => {
+      if (err) {
+        let error = new Error("Error fetching employees leave requests");
+        error.status = 400;
+        throw error;
+      }
+      else if (data.length) {
+        return res.status(200).json({
+          data,
+          message: "Data fetched",
+          status: true
+        })
+      }
+      else {
+        return res.status(400).json({
+          data: false,
+          message: 'No leave approval requests found',
+          status: true
+        })
+      }
+    })
+  } catch (e) {
+    console.log(e)
+    return res.status(400).json({ data: false, message: "Request Failed", status: false })
+  }
+}
+
+const leavesApproveReject = async (req,res) => {
+  try {
+    await connection.query(`update leave_information set status='${req.body.status}' where leave_id='${req.body.leaveId}'`, async (err, data) => {
+      if (err) {
+        let error = new Error(`Error updating leave id ${req.body.leaveId}`);
+        error.status = 400;
+        throw error;
+      }
+      else if (data.affectedRows) {
+        req.body.leave_start_date=req.body.leave_start_date.replaceAll("-","/")
+        req.body.leave_end_date=req.body.leave_end_date.replaceAll("-","/")
+        let date=new Date(req.body.leave_start_date)
+        let date2=new Date(req.body.leave_end_date)
+        let days=(date2.getTime()-date.getTime())/ (1000 * 3600 * 24)
+        if(req.body.status==='approved'){
+          await connection.query(`update employee set num_of_leaves=num_of_leaves-${days} where emp_id='${req.body.employee_id}';`, (err2, data2) => {
+            if (err2) {
+              console.log(err2)
+              let error = new Error("Failed to deduct employee's leaves");
+              error.status = 400;
+              throw error;
+            }
+            else if (data2.affectedRows) {
+              return res.status(200).json({
+                data2,
+                message: "Data Updated",
+                status: true
+              })
+            }
+            else {
+              return res.status(400).json({
+                data: false,
+                message: 'Failed to find employee',
+                status: true
+              })
+            }
+          })
+        }
+        else{
+          if (data.affectedRows) {
+            return res.status(200).json({
+              data,
+              message: "Data Updated",
+              status: true
+            })
+          }
+          else {
+            return res.status(400).json({
+              data: false,
+              message: 'Failed to find leave id',
+              status: true
+            })
+          }
+        }
+      }
+      else {
+        return res.status(400).json({
+          data: false,
+          message: 'Leave Id not found',
+          status: true
+        })
+      }
+    })
+  } catch (e) {
+    console.log(e)
+    return res.status(400).json({ data: false, message: "Request Failed", status: false })
+  }
+}
+
+const leavesRequest = async (req, res) => {
+  try {
+    await connection.query(`insert into leave_information values(null,${req.body.emp_id},${req.body.manager_id},'${req.body.leaveDesc}','${req.body.start_date}','${req.body.end_date}');`, (err, data) => {
+      if (err) {
+        let error = new Error("Failed to raise leave request");
+        error.status = 400;
+        throw error;
+      }
+      else if (data.affectedRows) {
+        return res.status(200).json({
+          data,
+          message: data.affectedRows+" rows inserted",
+          status: true
+        })
+      }
+      else {
+        return res.status(400).json({
+          data: false,
+          message: 'Failed to raise leave request',
+          status: true
+        })
+      }
+    })
+  } catch (e) {
+    console.log(e)
+    return res.status(400).json({ data: false, message: "Request Failed", status: false })
+  }
+}
+
+module.exports = { login, create_employee, profile, leavesGet, leavesRequest , leavesRaised, leavesRequestsReceived, leavesApproveReject, dailystandupform, fetchStandupForm }
