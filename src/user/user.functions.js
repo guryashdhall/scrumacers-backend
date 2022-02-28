@@ -350,7 +350,7 @@ const leavesApproveReject = async (req,res) => {
 
 const leavesRequest = async (req, res) => {
   try {
-    await connection.query(`insert into leave_information values(null,${req.body.emp_id},${req.body.manager_id},'${req.body.leaveDesc}','${req.body.start_date}','${req.body.end_date}');`, (err, data) => {
+    await connection.query(`insert into leave_information values(null,${req.body.emp_id},${req.body.manager_id},'${req.body.leaveDesc}','${req.body.start_date}','${req.body.end_date}',DEFAULT,DEFAULT);`, (err, data) => {
       if (err) {
         let error = new Error("Failed to raise leave request");
         error.status = 400;
