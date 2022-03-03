@@ -20,63 +20,63 @@ const create_employee = async (req, res) => {
 };
 
 //Function to create daily stand up form
-const dailystandupform=async(req,res) =>{
-  let e=new Error()
-try {
-  validate_standup_form.validate_scrum_form(req.body);
-  await connection.query(`INSERT INTO  CSCI5308_7_DEVINT.scrum_form (team_id, employee_id, ques_1, ques_2, ques_3)
+const dailystandupform = async (req, res) => {
+  let e = new Error()
+  try {
+    validate_standup_form.validate_scrum_form(req.body);
+    await connection.query(`INSERT INTO  CSCI5308_7_DEVINT.scrum_form (team_id, employee_id, ques_1, ques_2, ques_3)
   values(${req.employee[0].team_id},${req.employee[0].emp_id}, "${req.body.q1}","${req.body.q2}",
-  "${req.body.q3}");`,(err,data)=>{
-    if(err){
-      e.message="something went wrong";
-      e.status=400;
-      throw e;
-    } else if(data.affectedRows){
-      console.log(data);
-      return res.status(200).json({data:true,message:"Form Submitted Successfully", status:true})
-    }
-    else{
-      return res.status(400).json({data:false, message:"Form not inserted", status:true})
-    }
-  })
+  "${req.body.q3}");`, (err, data) => {
+      if (err) {
+        e.message = "something went wrong";
+        e.status = 400;
+        throw e;
+      } else if (data.affectedRows) {
+        console.log(data);
+        return res.status(200).json({ data: true, message: "Form Submitted Successfully", status: true })
+      }
+      else {
+        return res.status(400).json({ data: false, message: "Form not inserted", status: true })
+      }
+    })
 
-  
-} catch (e) {
-  console.log(`Error: `, e);
+
+  } catch (e) {
+    console.log(`Error: `, e);
     return res
       .status(400)
       .json({ data: false, message: `fail`, status: false });
-  
-}
+
+  }
 }
 
 // To fetch the details of stand up form filled by an employee
-const fetchStandupForm=async(req,res) =>{
-  let e=new Error()
-try {
-  await connection.query(`SELECT * FROM  CSCI5308_7_DEVINT.scrum_form WHERE employee_id = ${req.employee[0].emp_id} 
-  and DATE(creation_timestamp) = CURDATE();`,(err,data)=>{
-    if(err){
-      e.message="something went wrong";
-      e.status=400;
-      throw e;
-    } else if(data.length){
-      console.log(data);
-      return res.status(200).json({data,message:"Form fetched Successfully", status:true})
-    }
-    else{
-      return res.status(400).json({data:false, message:"Form not found for today", status:true})
-    }
-  })
+const fetchStandupForm = async (req, res) => {
+  let e = new Error()
+  try {
+    await connection.query(`SELECT * FROM  CSCI5308_7_DEVINT.scrum_form WHERE employee_id = ${req.employee[0].emp_id} 
+  and DATE(creation_timestamp) = CURDATE();`, (err, data) => {
+      if (err) {
+        e.message = "something went wrong";
+        e.status = 400;
+        throw e;
+      } else if (data.length) {
+        console.log(data);
+        return res.status(200).json({ data, message: "Form fetched Successfully", status: true })
+      }
+      else {
+        return res.status(400).json({ data: false, message: "Form not found for today", status: true })
+      }
+    })
 
-  
-} catch (e) {
-  console.log(`Error: `, e);
+
+  } catch (e) {
+    console.log(`Error: `, e);
     return res
       .status(400)
       .json({ data: false, message: `fail`, status: false });
-  
-}
+
+  }
 }
 
 // const login = async (req, res) => {
@@ -221,7 +221,7 @@ const leavesGet = async (req, res) => {
   }
 }
 
-const leavesRaised = async (req,res) => {
+const leavesRaised = async (req, res) => {
   try {
     await connection.query(`select * from leave_information where employee_id=${req.employee[0].emp_id} order by leave_apply_date desc`, (err, data) => {
       if (err) {
@@ -250,7 +250,7 @@ const leavesRaised = async (req,res) => {
   }
 }
 
-const leavesRequestsReceived = async (req,res) => {
+const leavesRequestsReceived = async (req, res) => {
   try {
     await connection.query(`select * from leave_information where manager_id=${req.employee[0].emp_id} order by leave_apply_date desc`, (err, data) => {
       if (err) {
@@ -279,7 +279,7 @@ const leavesRequestsReceived = async (req,res) => {
   }
 }
 
-const leavesApproveReject = async (req,res) => {
+const leavesApproveReject = async (req, res) => {
   try {
     await connection.query(`update leave_information set status='${req.body.status}' where leave_id='${req.body.leaveId}'`, async (err, data) => {
       if (err) {
@@ -288,12 +288,12 @@ const leavesApproveReject = async (req,res) => {
         throw error;
       }
       else if (data.affectedRows) {
-        req.body.leave_start_date=req.body.leave_start_date.replaceAll("-","/")
-        req.body.leave_end_date=req.body.leave_end_date.replaceAll("-","/")
-        let date=new Date(req.body.leave_start_date)
-        let date2=new Date(req.body.leave_end_date)
-        let days=(date2.getTime()-date.getTime())/ (1000 * 3600 * 24)
-        if(req.body.status==='approved'){
+        req.body.leave_start_date = req.body.leave_start_date.replaceAll("-", "/")
+        req.body.leave_end_date = req.body.leave_end_date.replaceAll("-", "/")
+        let date = new Date(req.body.leave_start_date)
+        let date2 = new Date(req.body.leave_end_date)
+        let days = (date2.getTime() - date.getTime()) / (1000 * 3600 * 24)
+        if (req.body.status === 'approved') {
           await connection.query(`update employee set num_of_leaves=num_of_leaves-${days} where emp_id='${req.body.employee_id}';`, (err2, data2) => {
             if (err2) {
               console.log(err2)
@@ -317,7 +317,7 @@ const leavesApproveReject = async (req,res) => {
             }
           })
         }
-        else{
+        else {
           if (data.affectedRows) {
             return res.status(200).json({
               data,
@@ -359,7 +359,7 @@ const leavesRequest = async (req, res) => {
       else if (data.affectedRows) {
         return res.status(200).json({
           data,
-          message: data.affectedRows+" rows inserted",
+          message: data.affectedRows + " rows inserted",
           status: true
         })
       }
@@ -377,4 +377,30 @@ const leavesRequest = async (req, res) => {
   }
 }
 
-module.exports = { login, create_employee, profile, leavesGet, leavesRequest , leavesRaised, leavesRequestsReceived, leavesApproveReject, dailystandupform, fetchStandupForm }
+// To fetch the details of stand up form filled by an employee for Manager
+const fetchStandupFormManager = async (req, res) => {
+  let e = new Error()
+  try {
+    await connection.query(`SELECT * FROM  CSCI5308_7_DEVINT.scrum_form WHERE team_id = ${req.employee[0].team_id} 
+  and DATE(creation_timestamp) = CURDATE();`, (err, data) => {
+      if (err) {
+        e.message = "something went wrong";
+        e.status = 400;
+        throw e;
+      } else if (data.length) {
+        return res.status(200).json({ data, message: "Form fetched Successfully", status: true })
+      }
+      else {
+        return res.status(400).json({ data: false, message: "Form not found for today", status: true })
+      }
+    })
+  } catch (e) {
+    console.log(`Error: `, e);
+    return res
+      .status(400)
+      .json({ data: false, message: `fail`, status: false });
+
+  }
+}
+
+module.exports = { login, create_employee, profile, leavesGet, leavesRequest, leavesRaised, leavesRequestsReceived, leavesApproveReject, dailystandupform, fetchStandupForm, fetchStandupFormManager }
