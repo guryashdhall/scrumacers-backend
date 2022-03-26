@@ -274,6 +274,15 @@ const profile = async (req, res) => {
                 "emp_id": obj.emp_id,
                 "first_name": obj.first_name,
                 "last_name": obj.last_name,
+                "email": obj.email,
+                "password": obj.password,
+                "team_id":obj.team_id,
+                "team_name": obj.team_name,
+                "team_description": obj.team_description,
+                "team_leader": obj.team_leader,
+                "number_of_leaves_left": obj.num_of_leaves,
+                "emp_type": obj.emp_type,
+                "emp_position": obj.type_name,
                 "badge_earned": [],
               })
             }
