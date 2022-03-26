@@ -665,19 +665,18 @@ const fetchAnnouncements = async (req,res) => {
   }
 }
 
-const updateAnnouncement = async (req,res)=>{
+const addAnnouncement = async (req,res)=>{
   let e = new Error()
   try {
-    await connection.query(`update announcement set
-     title="${req.body.title}", description="${req.body.description}"
-     where id=${req.body.id} and posted_by=${req.employee[0].emp_id}`, (err, data) => {
+    await connection.query(`insert announcement (title, description, posted_by) values
+    ("${req.body.title}","${req.body.description}",${req.employee[0].emp_id});`, (err, data) => {
       if (err) {
         e.message = "something went wrong";
         e.status = 400;
         throw e;
       }
       if(data.affectedRows){
-        return res.status(200).json({ data: true, message: `announcements updated`, status: true });
+        return res.status(200).json({ data: true, message: `announcement added`, status: true });
       } else {
         return res.status(400).json({ data: false, message: `announcement didn't update`, status: false });
       }
@@ -693,4 +692,4 @@ const updateAnnouncement = async (req,res)=>{
 module.exports = { login, create_employee, profile, leavesGet, leavesRequest, leavesRaised, 
   leavesRequestsReceived, leavesApproveReject, dailystandupform,
   fetchStandupForm, fetchStandupFormManager, fetchEmployeeBadges, fetchBadgeForEmployee,
-  fetchAnnouncements, updateAnnouncement }
+  fetchAnnouncements, addAnnouncement }
