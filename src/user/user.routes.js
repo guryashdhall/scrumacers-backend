@@ -17,6 +17,6 @@ router.get("/fetchStandupFormManager", authentication.isAuthenticated, functions
 router.get('/fetch-badge-for-employee', authentication.isAuthenticated, functions.fetchBadgeForEmployee);
 router.get('/fetch-employee-badges', authentication.isAuthenticated, functions.fetchEmployeeBadges);
 router.get('/fetch-announcements', authentication.isAuthenticated, functions.fetchAnnouncements);
-router.put('/add-announcement', authentication.isAuthenticated, functions.addAnnouncement);
+router.post('/post-announcement', authentication.isAuthenticated, functions.postAnnouncement);
 
 module.exports = router;

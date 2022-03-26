@@ -774,7 +774,7 @@ const fetchAnnouncements = async (req,res) => {
   }
 }
 
-const addAnnouncement = async (req,res)=>{
+const postAnnouncement = async (req,res)=>{
   let e = new Error()
   try {
     await connection.query(`insert announcement (title, description, posted_by) values
@@ -801,4 +801,4 @@ const addAnnouncement = async (req,res)=>{
 module.exports = { login, create_employee, profile, leavesGet, leavesRequest, leavesRaised, 
   leavesRequestsReceived, leavesApproveReject, dailystandupform,
   fetchStandupForm, fetchStandupFormManager, fetchEmployeeBadges, fetchBadgeForEmployee,
-  fetchAnnouncements, addAnnouncement }
+  fetchAnnouncements, postAnnouncement }
