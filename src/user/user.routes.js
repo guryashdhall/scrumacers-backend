@@ -16,4 +16,7 @@ router.put("/leavesApproveReject", authentication.isAuthenticated, functions.lea
 router.get("/fetchStandupFormManager", authentication.isAuthenticated, functions.fetchStandupFormManager);
 router.get('/fetch-badge-for-employee', authentication.isAuthenticated, functions.fetchBadgeForEmployee);
 router.get('/fetch-employee-badges', authentication.isAuthenticated, functions.fetchEmployeeBadges);
+router.get('/fetch-announcements', authentication.isAuthenticated, functions.fetchAnnouncements);
+router.put('/update-announcement', authentication.isAuthenticated, functions.updateAnnouncement);
+
 module.exports = router;

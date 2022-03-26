@@ -640,6 +640,57 @@ const fetchBadgeForEmployee=async (req,res)=>{
   }
 }
 
+// Fetch Data - Announcement Module
+const fetchAnnouncements = async (req,res) => {
+  let e = new Error()
+  try {
+    await connection.query(`select e.first_name, e.last_name, e.email, e.emp_type, et.type_name as 'employee_position',
+      t.team_name, a.* from announcement as a left join employee as e
+      on a.posted_by=e.emp_id
+      left join team as t on e.team_id=t.team_id
+      left join employee_type as et on e.emp_type=et.id
+      order by created_at desc;`, (err, data) => {
+      if (err) {
+        e.message = "something went wrong";
+        e.status = 400;
+        throw e;
+      }
+      return res.status(200).json({ data, message: `announcements fetched`, status: true });
+    })
+  } catch (e) {
+    console.log(`Error: `, e);
+    return res
+      .status(400)
+      .json({ data: false, message: `fail`, status: false });
+  }
+}
+
+const updateAnnouncement = async (req,res)=>{
+  let e = new Error()
+  try {
+    await connection.query(`update announcement set
+     title="${req.body.title}", description="${req.body.description}"
+     where id=${req.body.id} and posted_by=${req.employee[0].emp_id}`, (err, data) => {
+      if (err) {
+        e.message = "something went wrong";
+        e.status = 400;
+        throw e;
+      }
+      if(data.affectedRows){
+        return res.status(200).json({ data: true, message: `announcements updated`, status: true });
+      } else {
+        return res.status(400).json({ data: false, message: `announcement didn't update`, status: false });
+      }
+    })
+  } catch (e) {
+    console.log(`Error: `, e);
+    return res
+      .status(400)
+      .json({ data: false, message: `fail`, status: false });
+  }
+}
+
 module.exports = { login, create_employee, profile, leavesGet, leavesRequest, leavesRaised, 
   leavesRequestsReceived, leavesApproveReject, dailystandupform,
-   fetchStandupForm, fetchStandupFormManager,fetchEmployeeBadges,fetchBadgeForEmployee }
+  fetchStandupForm, fetchStandupFormManager, fetchEmployeeBadges, fetchBadgeForEmployee,
+  fetchAnnouncements, updateAnnouncement }
