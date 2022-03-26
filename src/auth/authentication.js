@@ -7,7 +7,6 @@ const isAuthenticated = (req, res, next) => {
     if (token) {
       // Remove Bearer from string
       token = token.slice(7);
-      console.log(token);
       jwt.verify(token, "afgps7", async (err, decoded) => {
         if (err) {
           return res.status(401).json({
@@ -16,9 +15,7 @@ const isAuthenticated = (req, res, next) => {
             status: false,
           });
         } else {
-          console.log(decoded);
           req.decoded = decoded;
-          console.log("req.decoded")
           await connection.query(
             `select * from employee where emp_id=${req.decoded.result.emp_id}`
             , (err, data) => {

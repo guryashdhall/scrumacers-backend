@@ -172,15 +172,124 @@ const login = async (req, res) => {
 // Code which helped verify authentication
 const profile = async (req, res) => {
   try {
-    await connection.query(`select * from  employee where emp_id=${req.employee[0].emp_id}`, (err, data) => {
+    await connection.query(`select e.*, et.type_name, t.team_name, t.team_description, t.team_leader, b.* from employee as e left join team as t
+    on e.team_id=t.team_id 
+    left join employee_type as et
+    on e.emp_type=et.id
+    left join employee_badge as eb
+    on e.emp_id=eb.employee_id
+    left join badge as b
+    on eb.badge_id=b.id
+    where e.emp_id=${req.employee[0].emp_id}`, (err, data) => {
       if (err) {
         let error = new Error("Error fetching employee profile");
         error.status = 400;
         throw error;
       }
       if (data.length) {
+        var result=[];
+        data.forEach(obj => {
+          if (result[0]) {
+            var exist_or_not = 0;
+            var index;
+            result.forEach((element, i) => {
+              if (element.emp_id == obj.emp_id) {
+                exist_or_not = 1;
+                index = i
+              }
+            })
+            if (exist_or_not == 0) {
+              if (obj.id != null) {
+                result.push({
+                  "emp_id": obj.emp_id,
+                  "first_name": obj.first_name,
+                  "last_name": obj.last_name,
+                  "email": obj.email,
+                  "password": obj.password,
+                  "team_id":obj.team_id,
+                  "team_name": obj.team_name,
+                  "team_description": obj.team_description,
+                  "team_leader": obj.team_leader,
+                  "number_of_leaves_left": obj.num_of_leaves,
+                  "emp_type": obj.emp_type,
+                  "emp_position": obj.type_name,
+                  "badge_earned": [{
+                    "badge_id": obj.id,
+                    "badge_name": obj.name,
+                    "badge_description": obj.description,
+                    "received_at": obj.receieved_at
+                  }]
+                })
+              } else {
+                result.push({
+                  "emp_id": obj.emp_id,
+                  "first_name": obj.first_name,
+                  "last_name": obj.last_name,
+                  "email": obj.email,
+                  "password": obj.password,
+                  "team_id":obj.team_id,
+                  "team_name": obj.team_name,
+                  "team_description": obj.team_description,
+                  "team_leader": obj.team_leader,
+                  "number_of_leaves_left": obj.num_of_leaves,
+                  "emp_type": obj.emp_type,
+                  "emp_position": obj.type_name,
+                  "badge_earned": [],
+                })
+              }
+            } else {
+              if (obj.id != null) {
+                result[index]["badge_earned"].push({
+                  "badge_id": obj.id,
+                  "badge_name": obj.name,
+                  "badge_description": obj.description,
+                  "received_at": obj.receieved_at
+                })
+              }
+            }
+          } else {
+            if (obj.id != null) {
+              result.push({
+                "emp_id": obj.emp_id,
+                "first_name": obj.first_name,
+                "last_name": obj.last_name,
+                "email": obj.email,
+                "password": obj.password,
+                "team_id":obj.team_id,
+                "team_name": obj.team_name,
+                "team_description": obj.team_description,
+                "team_leader": obj.team_leader,
+                "number_of_leaves_left": obj.num_of_leaves,
+                "emp_type": obj.emp_type,
+                "emp_position": obj.type_name,
+                "badge_earned": [{
+                  "badge_id": obj.id,
+                  "badge_name": obj.name,
+                  "badge_description": obj.description,
+                  "received_at": obj.receieved_at
+                }],
+              })           
+            } else {
+              result.push({
+                "emp_id": obj.emp_id,
+                "first_name": obj.first_name,
+                "last_name": obj.last_name,
+                "email": obj.email,
+                "password": obj.password,
+                "team_id":obj.team_id,
+                "team_name": obj.team_name,
+                "team_description": obj.team_description,
+                "team_leader": obj.team_leader,
+                "number_of_leaves_left": obj.num_of_leaves,
+                "emp_type": obj.emp_type,
+                "emp_position": obj.type_name,
+                "badge_earned": [],
+              })
+            }
+          }
+        })
         return res.status(200).json({
-          data,
+          result,
           message: "Data fetched",
           status: true
         })
