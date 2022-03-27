@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "mocha ./test/* --timeout 20000 --exit"
+    "start": "nodemon index.js",
+    "test": "nyc mocha ./test/* --timeout 20000 --exit && nyc report --reporter=lcov"
   },
   "author": "Group 7",
   "license": "ISC",
@@ -18,6 +18,9 @@
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
     "mocha": "^9.2.0",
+    "mocha-lcov-reporter": "^1.3.0",
+    "nodemon": "^2.0.15",
+    "nyc": "^15.1.0",
     "promise-mysql": "^5.1.0",
     "supertest": "^6.2.2"
   }

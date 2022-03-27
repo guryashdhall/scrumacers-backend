@@ -172,15 +172,124 @@ const login = async (req, res) => {
 // Code which helped verify authentication
 const profile = async (req, res) => {
   try {
-    await connection.query(`select * from  employee where emp_id=${req.employee[0].emp_id}`, (err, data) => {
+    await connection.query(`select e.*, et.type_name, t.team_name, t.team_description, t.team_leader, b.* from employee as e left join team as t
+    on e.team_id=t.team_id 
+    left join employee_type as et
+    on e.emp_type=et.id
+    left join employee_badge as eb
+    on e.emp_id=eb.employee_id
+    left join badge as b
+    on eb.badge_id=b.id
+    where e.emp_id=${req.employee[0].emp_id}`, (err, data) => {
       if (err) {
         let error = new Error("Error fetching employee profile");
         error.status = 400;
         throw error;
       }
       if (data.length) {
+        var result=[];
+        data.forEach(obj => {
+          if (result[0]) {
+            var exist_or_not = 0;
+            var index;
+            result.forEach((element, i) => {
+              if (element.emp_id == obj.emp_id) {
+                exist_or_not = 1;
+                index = i
+              }
+            })
+            if (exist_or_not == 0) {
+              if (obj.id != null) {
+                result.push({
+                  "emp_id": obj.emp_id,
+                  "first_name": obj.first_name,
+                  "last_name": obj.last_name,
+                  "email": obj.email,
+                  "password": obj.password,
+                  "team_id":obj.team_id,
+                  "team_name": obj.team_name,
+                  "team_description": obj.team_description,
+                  "team_leader": obj.team_leader,
+                  "number_of_leaves_left": obj.num_of_leaves,
+                  "emp_type": obj.emp_type,
+                  "emp_position": obj.type_name,
+                  "badge_earned": [{
+                    "badge_id": obj.id,
+                    "badge_name": obj.name,
+                    "badge_description": obj.description,
+                    "received_at": obj.receieved_at
+                  }]
+                })
+              } else {
+                result.push({
+                  "emp_id": obj.emp_id,
+                  "first_name": obj.first_name,
+                  "last_name": obj.last_name,
+                  "email": obj.email,
+                  "password": obj.password,
+                  "team_id":obj.team_id,
+                  "team_name": obj.team_name,
+                  "team_description": obj.team_description,
+                  "team_leader": obj.team_leader,
+                  "number_of_leaves_left": obj.num_of_leaves,
+                  "emp_type": obj.emp_type,
+                  "emp_position": obj.type_name,
+                  "badge_earned": [],
+                })
+              }
+            } else {
+              if (obj.id != null) {
+                result[index]["badge_earned"].push({
+                  "badge_id": obj.id,
+                  "badge_name": obj.name,
+                  "badge_description": obj.description,
+                  "received_at": obj.receieved_at
+                })
+              }
+            }
+          } else {
+            if (obj.id != null) {
+              result.push({
+                "emp_id": obj.emp_id,
+                "first_name": obj.first_name,
+                "last_name": obj.last_name,
+                "email": obj.email,
+                "password": obj.password,
+                "team_id":obj.team_id,
+                "team_name": obj.team_name,
+                "team_description": obj.team_description,
+                "team_leader": obj.team_leader,
+                "number_of_leaves_left": obj.num_of_leaves,
+                "emp_type": obj.emp_type,
+                "emp_position": obj.type_name,
+                "badge_earned": [{
+                  "badge_id": obj.id,
+                  "badge_name": obj.name,
+                  "badge_description": obj.description,
+                  "received_at": obj.receieved_at
+                }],
+              })           
+            } else {
+              result.push({
+                "emp_id": obj.emp_id,
+                "first_name": obj.first_name,
+                "last_name": obj.last_name,
+                "email": obj.email,
+                "password": obj.password,
+                "team_id":obj.team_id,
+                "team_name": obj.team_name,
+                "team_description": obj.team_description,
+                "team_leader": obj.team_leader,
+                "number_of_leaves_left": obj.num_of_leaves,
+                "emp_type": obj.emp_type,
+                "emp_position": obj.type_name,
+                "badge_earned": [],
+              })
+            }
+          }
+        })
         return res.status(200).json({
-          data,
+          result,
           message: "Data fetched",
           status: true
         })
@@ -409,4 +518,287 @@ const fetchStandupFormManager = async (req, res) => {
   }
 }
 
-module.exports = { login, create_employee, profile, leavesGet, leavesRequest, leavesRaised, leavesRequestsReceived, leavesApproveReject, dailystandupform, fetchStandupForm, fetchStandupFormManager }
+// Badges fetched by manager of all  employees
+const fetchEmployeeBadges = async (req, res) => {
+  let e = new Error()
+  try {
+    await connection.query(`select e.emp_id, e.first_name, e.last_name, eb.receieved_at, b.id, b.name, b.description 
+    from employee as e left join employee_badge as eb
+    on eb.employee_id=e.emp_id
+    left join badge as b
+    on eb.badge_id=b.id
+    where e.team_id=${req.employee[0].team_id} and e.emp_id!=${req.employee[0].emp_id};`, async (err, data) => {
+      if (err) {
+        e.message = "something went wrong";
+        e.status = 400;
+        throw e;
+      }
+      await connection.query(`select * from badge`, (err, badge) => {
+        if (err) {
+          e.message = "something went wrong";
+          e.status = 400;
+          throw e;
+        }
+        var result=[];
+        data.forEach(obj => {
+          if (result[0]) {
+            var exist_or_not = 0;
+            var index;
+            result.forEach((element, i) => {
+              if (element.emp_id == obj.emp_id) {
+                exist_or_not = 1;
+                index = i
+              }
+            })
+            if (exist_or_not == 0) {
+              if (obj.id != null) {
+                result.push({
+                  "emp_id": obj.emp_id,
+                  "first_name": obj.first_name,
+                  "last_name": obj.last_name,
+                  "selected_badge": [{
+                    "badge_id": obj.id,
+                    "badge_name": obj.name,
+                    "badge_description": obj.description,
+                    "received_at": obj.receieved_at
+                  }],
+                  "unselected_badge": []
+                })
+              } else {
+                result.push({
+                  "emp_id": obj.emp_id,
+                  "first_name": obj.first_name,
+                  "last_name": obj.last_name,
+                  "selected_badge": [],
+                  "unselected_badge": []
+                })
+              }
+            } else {
+              if (obj.id != null) {
+                result[index]["selected_badge"].push({
+                  "badge_id": obj.id,
+                  "badge_name": obj.name,
+                  "badge_description": obj.description,
+                  "received_at": obj.receieved_at
+                })
+              }
+            }
+          } else {
+            if (obj.id != null) {
+              result.push({
+                "emp_id": obj.emp_id,
+                "first_name": obj.first_name,
+                "last_name": obj.last_name,
+                "selected_badge": [{
+                  "badge_id": obj.id,
+                  "badge_name": obj.name,
+                  "badge_description": obj.description,
+                  "received_at": obj.receieved_at
+                }],
+                "unselected_badge": []
+              })           
+            } else {
+              result.push({
+                "emp_id": obj.emp_id,
+                "first_name": obj.first_name,
+                "last_name": obj.last_name,
+                "selected_badge": [],
+                "unselected_badge": []
+              })
+            }
+          }
+        })
+
+        result.forEach((element) => {
+          var temp_badge = badge
+          element.selected_badge.forEach(i => {
+            temp_badge.forEach(j => {
+              if (i.badge_id == j.id) {
+                temp_badge = temp_badge.filter(obj => obj.id != i.badge_id);
+              }
+            })
+          })
+          element.unselected_badge = temp_badge
+        })
+
+        return res.status(200).json(result);
+      })
+      return res.status(400).send("Something's not alright");
+    })
+  } catch (e) {
+    console.log(`Error: `, e);
+    return res
+      .status(400)
+      .json({ data: false, message: `fail`, status: false });
+  }
+}
+
+
+//Fetch Badges for an Employee
+const fetchBadgeForEmployee=async (req,res)=>{
+  let e = new Error()
+  try {
+    await connection.query(`select e.emp_id, e.first_name, e.last_name, eb.receieved_at, b.id, b.name, b.description 
+    from employee as e left join employee_badge as eb
+    on eb.employee_id=e.emp_id
+    left join badge as b
+    on eb.badge_id=b.id
+    where e.emp_id=${req.employee[0].emp_id};`, async (err, data) => {
+      if (err) {
+        e.message = "something went wrong";
+        e.status = 400;
+        throw e;
+      }
+      await connection.query(`select * from badge`, (err, badge) => {
+        if (err) {
+          e.message = "something went wrong";
+          e.status = 400;
+          throw e;
+        }
+        var result=[];
+        data.forEach(obj => {
+          if (result[0]) {
+            var exist_or_not = 0;
+            var index;
+            result.forEach((element, i) => {
+              if (element.emp_id == obj.emp_id) {
+                exist_or_not = 1;
+                index = i
+              }
+            })
+            if (exist_or_not == 0) {
+              if (obj.id != null) {
+                result.push({
+                  "emp_id": obj.emp_id,
+                  "first_name": obj.first_name,
+                  "last_name": obj.last_name,
+                  "selected_badge": [{
+                    "badge_id": obj.id,
+                    "badge_name": obj.name,
+                    "badge_description": obj.description,
+                    "received_at": obj.receieved_at
+                  }],
+                  "unselected_badge": []
+                })
+              } else {
+                result.push({
+                  "emp_id": obj.emp_id,
+                  "first_name": obj.first_name,
+                  "last_name": obj.last_name,
+                  "selected_badge": [],
+                  "unselected_badge": []
+                })
+              }
+            } else {
+              if (obj.id != null) {
+                result[index]["selected_badge"].push({
+                  "badge_id": obj.id,
+                  "badge_name": obj.name,
+                  "badge_description": obj.description,
+                  "received_at": obj.receieved_at
+                })
+              }
+            }
+          } else {
+            if (obj.id != null) {
+              result.push({
+                "emp_id": obj.emp_id,
+                "first_name": obj.first_name,
+                "last_name": obj.last_name,
+                "selected_badge": [{
+                  "badge_id": obj.id,
+                  "badge_name": obj.name,
+                  "badge_description": obj.description,
+                  "received_at": obj.receieved_at
+                }],
+                "unselected_badge": []
+              })           
+            } else {
+              result.push({
+                "emp_id": obj.emp_id,
+                "first_name": obj.first_name,
+                "last_name": obj.last_name,
+                "selected_badge": [],
+                "unselected_badge": []
+              })
+            }
+          }
+        })
+
+        result.forEach((element) => {
+          var temp_badge = badge
+          element.selected_badge.forEach(i => {
+            temp_badge.forEach(j => {
+              if (i.badge_id == j.id) {
+                temp_badge = temp_badge.filter(obj => obj.id != i.badge_id);
+              }
+            })
+          })
+          element.unselected_badge = temp_badge
+        })
+
+        return res.status(200).json(result);
+      })
+      return res.status(400).send("Something's not alright");
+    })
+  } catch (e) {
+    console.log(`Error: `, e);
+    return res
+      .status(400)
+      .json({ data: false, message: `fail`, status: false });
+  }
+}
+
+// Fetch Data - Announcement Module
+const fetchAnnouncements = async (req,res) => {
+  let e = new Error()
+  try {
+    await connection.query(`select e.first_name, e.last_name, e.email, e.emp_type, et.type_name as 'employee_position',
+      t.team_name, a.* from announcement as a left join employee as e
+      on a.posted_by=e.emp_id
+      left join team as t on e.team_id=t.team_id
+      left join employee_type as et on e.emp_type=et.id
+      order by created_at desc;`, (err, data) => {
+      if (err) {
+        e.message = "something went wrong";
+        e.status = 400;
+        throw e;
+      }
+      return res.status(200).json({ data, message: `announcements fetched`, status: true });
+    })
+  } catch (e) {
+    console.log(`Error: `, e);
+    return res
+      .status(400)
+      .json({ data: false, message: `fail`, status: false });
+  }
+}
+
+const postAnnouncement = async (req,res)=>{
+  let e = new Error()
+  try {
+    await connection.query(`insert announcement (title, description, posted_by) values
+    ("${req.body.title}","${req.body.description}",${req.employee[0].emp_id});`, (err, data) => {
+      if (err) {
+        e.message = "something went wrong";
+        e.status = 400;
+        throw e;
+      }
+      if(data.affectedRows){
+        return res.status(200).json({ data: true, message: `announcement added`, status: true });
+      } else {
+        return res.status(400).json({ data: false, message: `announcement didn't update`, status: false });
+      }
+    })
+  } catch (e) {
+    console.log(`Error: `, e);
+    return res
+      .status(400)
+      .json({ data: false, message: `fail`, status: false });
+  }
+}
+
+module.exports = { login, create_employee, profile, leavesGet, leavesRequest, leavesRaised, 
+  leavesRequestsReceived, leavesApproveReject, dailystandupform,
+  fetchStandupForm, fetchStandupFormManager, fetchEmployeeBadges, fetchBadgeForEmployee,
+  fetchAnnouncements, postAnnouncement }
