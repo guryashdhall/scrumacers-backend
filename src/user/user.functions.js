@@ -1,5 +1,6 @@
 const validate_login = require('../validation/validateLogin');
 const validate_standup_form = require('../validation/validate_scrum_form');
+const validate_announcement = require('../validation/validateAnnouncement');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 // Code that could be  used in future.
@@ -777,6 +778,7 @@ const fetchAnnouncements = async (req,res) => {
 const postAnnouncement = async (req,res)=>{
   let e = new Error()
   try {
+    validate_announcement.validateAnnouncement(req.body);
     await connection.query(`insert announcement (title, description, posted_by) values
     ("${req.body.title}","${req.body.description}",${req.employee[0].emp_id});`, (err, data) => {
       if (err) {
