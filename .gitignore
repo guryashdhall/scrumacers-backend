@@ -6,3 +6,7 @@ node_modules/
 
 # Output
 dist
+
+coverage/
+
+.nyc_output
