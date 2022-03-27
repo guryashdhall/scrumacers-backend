@@ -24,9 +24,9 @@ const dailystandupform = async (req, res) => {
   let e = new Error()
   try {
     validate_standup_form.validate_scrum_form(req.body);
-    await connection.query(`INSERT INTO  CSCI5308_7_DEVINT.scrum_form (team_id, employee_id, ques_1, ques_2, ques_3)
+    await connection.query(`INSERT INTO  CSCI5308_7_DEVINT.scrum_form (team_id, employee_id, ques_1, ques_2, ques_3,blocker)
   values(${req.employee[0].team_id},${req.employee[0].emp_id}, "${req.body.q1}","${req.body.q2}",
-  "${req.body.q3}");`, (err, data) => {
+  "${req.body.q3}",${req.body.blocker});`, (err, data) => {
       if (err) {
         e.message = "something went wrong";
         e.status = 400;
