@@ -47,7 +47,8 @@ code-quality-check:
      paths:
        - .sonar/cache
    script:
-     - echo "Starting SonarCloud Code Quality Check"     
+     - echo "Starting SonarCloud Code Quality Check" 
+     - npm install    
      - npm test
      - sonar-scanner
      - echo "Completed SonarCloud Code Quality Check"
