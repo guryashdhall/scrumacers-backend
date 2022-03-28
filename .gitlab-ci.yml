@@ -5,6 +5,12 @@ stages:
   - backend-test
   - code-quality
 
+cache:
+  paths:
+    - node_modules/
+    - coverage/
+    - .nyc_output/
+
 backend-build:
   type: deploy
   stage: backend-build
