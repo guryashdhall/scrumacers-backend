@@ -5,12 +5,6 @@ stages:
   - backend-test
   - code-quality
 
-cache:
-  paths:
-    - node_modules/
-    - coverage/
-    - .nyc_output/
-
 backend-build:
   type: deploy
   stage: backend-build
@@ -53,6 +47,7 @@ code-quality-check:
      paths:
        - .sonar/cache
    script:
-     - echo "Starting SonarCloud Code Quality Check"
+     - echo "Starting SonarCloud Code Quality Check"     
+     - npm test
      - sonar-scanner
      - echo "Completed SonarCloud Code Quality Check"
