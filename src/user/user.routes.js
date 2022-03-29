@@ -18,5 +18,6 @@ router.get('/fetch-badge-for-employee', authentication.isAuthenticated, function
 router.get('/fetch-employee-badges', authentication.isAuthenticated, functions.fetchEmployeeBadges);
 router.get('/fetch-announcements', authentication.isAuthenticated, functions.fetchAnnouncements);
 router.post('/post-announcement', authentication.isAuthenticated, functions.postAnnouncement);
+router.put('/update-employee-badges', authentication.isAuthenticated, functions.updateEmployeeBadge);
 
 module.exports = router;
