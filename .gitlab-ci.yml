@@ -36,9 +36,7 @@ variables:
 code-quality-check:
    stage: code-quality
    only:
-    - development
-   tags: 
-    - dalfcs_docker_kvm
+    - development  
    image:
      name: sonarsource/sonar-scanner-cli:latest
      entrypoint: [""]
