@@ -750,6 +750,48 @@ const fetchBadgeForEmployee=async (req,res)=>{
   }
 }
 
+// Update Badges for Employees
+const updateEmployeeBadge = async (req, res) => {
+  let e = new Error()
+  try {
+    validate_announcement.validateAnnouncement(req.body);
+    await connection.query(`delete from employee_badge where employee_id=${req.body.emp_id};`
+      , (err, data) => {
+        if (err) {
+          e.message = "Something went wrong";
+          e.status = 400;
+          throw e;
+        }
+        if (req.body.badge_id.length) {
+          var insert_badge_sql = `insert employee_badge (employee_id, badge_id) values (${req.body.emp_id}, ${req.body.badge_id[0]})`
+          for (i = 1; i < req.body.badge_id.length; i++) {
+            insert_badge_sql += `,(${req.body.emp_id}, ${req.body.badge_id[i]})`
+          }
+          insert_badge_sql += `;`
+          await connection.query(insert_badge_sql, (err, data) => {
+            if (err) {
+              e.message = "something went wrong";
+              e.status = 400;
+              throw e;
+            }
+            if (data.affectedRows) {
+              return res.status(200).json({ data: true, message: `Badges updated`, status: true });
+            } else {
+              return res.status(400).json({ data: false, message: `Badges didn't update`, status: false });
+            }
+          })
+        } else {
+          return res.status(200).json({ data: true, message: "Badges updated", status: true })
+        }
+      })
+  } catch (e) {
+    console.log(`Error: `, e);
+    return res
+      .status(400)
+      .json({ data: false, message: `Fail`, status: false });
+  }
+}
+
 // Fetch Data - Announcement Module
 const fetchAnnouncements = async (req,res) => {
   let e = new Error()
@@ -827,4 +869,4 @@ const deleteAnnouncement = async (req,res)=>{
 module.exports = { login, create_employee, profile, leavesGet, leavesRequest, leavesRaised, 
   leavesRequestsReceived, leavesApproveReject, dailystandupform,
   fetchStandupForm, fetchStandupFormManager, fetchEmployeeBadges, fetchBadgeForEmployee,
-  fetchAnnouncements, postAnnouncement, deleteAnnouncement }
+  fetchAnnouncements, postAnnouncement,deleteAnnouncement,updateEmployeeBadge }
