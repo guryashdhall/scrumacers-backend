@@ -756,7 +756,7 @@ const updateEmployeeBadge = async (req, res) => {
   try {
     validate_announcement.validateAnnouncement(req.body);
     await connection.query(`delete from employee_badge where employee_id=${req.body.emp_id};`
-      , (err, data) => {
+      , async (err, data) => {
         if (err) {
           e.message = "Something went wrong";
           e.status = 400;
