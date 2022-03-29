@@ -800,7 +800,31 @@ const postAnnouncement = async (req,res)=>{
   }
 }
 
+const deleteAnnouncement = async (req,res)=>{
+  let e = new Error()
+  try {
+    await connection.query(`delete from announcement where id=${req.body.post_id} and posted_by=${req.employee[0].emp_id};`,
+     (err, data) => {
+      if (err) {
+        e.message = "Something went wrong";
+        e.status = 400;
+        throw e;
+      }
+      if(data.affectedRows){
+        return res.status(200).json({ data: true, message: `Announcement Deleted`, status: true });
+      } else {
+        return res.status(400).json({ data: false, message: `Couldn't delete announcement. Try again!`, status: false });
+      }
+    })
+  } catch (e) {
+    console.log(`Error: `, e);
+    return res
+      .status(400)
+      .json({ data: false, message: `Something went wrong`, status: false });
+  }
+}
+
 module.exports = { login, create_employee, profile, leavesGet, leavesRequest, leavesRaised, 
   leavesRequestsReceived, leavesApproveReject, dailystandupform,
   fetchStandupForm, fetchStandupFormManager, fetchEmployeeBadges, fetchBadgeForEmployee,
-  fetchAnnouncements, postAnnouncement }
+  fetchAnnouncements, postAnnouncement, deleteAnnouncement }
