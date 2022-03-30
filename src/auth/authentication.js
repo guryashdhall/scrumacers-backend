@@ -1,5 +1,6 @@
 /* eslint-disable no-undef */
 const jwt = require("jsonwebtoken");
+require('dotenv').config();
 
 const isAuthenticated = (req, res, next) => {
   let token = req.get("Authorization");

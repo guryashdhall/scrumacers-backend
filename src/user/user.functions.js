@@ -25,29 +25,47 @@ const dailystandupform = async (req, res) => {
   let e = new Error()
   try {
     validate_standup_form.validate_scrum_form(req.body);
-    await connection.query(`INSERT INTO  CSCI5308_7_DEVINT.scrum_form (team_id, employee_id, ques_1, ques_2, ques_3,blocker)
-  values(${req.employee[0].team_id},${req.employee[0].emp_id}, "${req.body.q1}","${req.body.q2}",
-  "${req.body.q3}",${req.body.blocker});`, (err, data) => {
+    await connection.query(`INSERT INTO scrum_form (team_id, employee_id, ques_1, ques_2, ques_3,blocker)
+  values (${req.employee[0].team_id},${req.employee[0].emp_id}, "${req.body.q1}","${req.body.q2}",
+  "${req.body.q3}",${req.body.blocker});`, async (err, data) => {
       if (err) {
         e.message = "something went wrong";
         e.status = 400;
         throw e;
       } else if (data.affectedRows) {
-        console.log(data);
-        return res.status(200).json({ data: true, message: "Form Submitted Successfully", status: true })
+        const receiver = await connection.query(`select emp_id from employee 
+        where team_id=${req.employee[0].team_id} and emp_id!=${req.employee[0].emp_id};`);
+
+        // Inserting notifications if there are blockers for any one of the team member
+        if (req.body.blocker > 0 && receiver.length) {
+          let insertnotification = `insert into notification (notification_description, notification_sender, notification_receiver)
+          values ("${req.employee[0].first_name} ${req.employee[0].last_name} has faced ${req.body.blocker} blockage", ${req.employee[0].emp_id},${receiver[0].emp_id})`
+          for (i = 1; i < receiver.length; i++) {
+            insertnotification += `,("${req.employee[0].first_name} ${req.employee[0].last_name} has faced ${req.body.blocker} blockage", ${req.employee[0].emp_id},${receiver[i].emp_id})`
+          }
+          insertnotification += `;`
+          await connection.query(insertnotification, (err, result) => {
+            if (err) {
+              e.message = "something went wrong";
+              e.status = 400;
+              throw e;
+            } else {
+              return res.status(200).json({ data: true, message: "Form Submitted Successfully", status: true })
+            }
+          })
+        } else {
+          return res.status(200).json({ data: true, message: "Form Submitted Successfully", status: true })
+        }
       }
       else {
         return res.status(400).json({ data: false, message: "Form not inserted", status: true })
       }
     })
-
-
   } catch (e) {
     console.log(`Error: `, e);
     return res
       .status(400)
       .json({ data: false, message: `fail`, status: false });
-
   }
 }
 
@@ -55,22 +73,19 @@ const dailystandupform = async (req, res) => {
 const fetchStandupForm = async (req, res) => {
   let e = new Error()
   try {
-    await connection.query(`SELECT * FROM  CSCI5308_7_DEVINT.scrum_form WHERE employee_id = ${req.employee[0].emp_id} 
+    await connection.query(`SELECT * FROM scrum_form WHERE employee_id = ${req.employee[0].emp_id} 
   and DATE(creation_timestamp) = CURDATE();`, (err, data) => {
       if (err) {
         e.message = "something went wrong";
         e.status = 400;
         throw e;
       } else if (data.length) {
-        console.log(data);
         return res.status(200).json({ data, message: "Form fetched Successfully", status: true })
       }
       else {
         return res.status(400).json({ data: false, message: "Form not found for today", status: true })
       }
     })
-
-
   } catch (e) {
     console.log(`Error: `, e);
     return res
@@ -188,7 +203,7 @@ const profile = async (req, res) => {
         throw error;
       }
       if (data.length) {
-        var result=[];
+        var result = [];
         data.forEach(obj => {
           if (result[0]) {
             var exist_or_not = 0;
@@ -207,7 +222,7 @@ const profile = async (req, res) => {
                   "last_name": obj.last_name,
                   "email": obj.email,
                   "password": obj.password,
-                  "team_id":obj.team_id,
+                  "team_id": obj.team_id,
                   "team_name": obj.team_name,
                   "team_description": obj.team_description,
                   "team_leader": obj.team_leader,
@@ -228,7 +243,7 @@ const profile = async (req, res) => {
                   "last_name": obj.last_name,
                   "email": obj.email,
                   "password": obj.password,
-                  "team_id":obj.team_id,
+                  "team_id": obj.team_id,
                   "team_name": obj.team_name,
                   "team_description": obj.team_description,
                   "team_leader": obj.team_leader,
@@ -256,7 +271,7 @@ const profile = async (req, res) => {
                 "last_name": obj.last_name,
                 "email": obj.email,
                 "password": obj.password,
-                "team_id":obj.team_id,
+                "team_id": obj.team_id,
                 "team_name": obj.team_name,
                 "team_description": obj.team_description,
                 "team_leader": obj.team_leader,
@@ -269,7 +284,7 @@ const profile = async (req, res) => {
                   "badge_description": obj.description,
                   "received_at": obj.receieved_at
                 }],
-              })           
+              })
             } else {
               result.push({
                 "emp_id": obj.emp_id,
@@ -277,7 +292,7 @@ const profile = async (req, res) => {
                 "last_name": obj.last_name,
                 "email": obj.email,
                 "password": obj.password,
-                "team_id":obj.team_id,
+                "team_id": obj.team_id,
                 "team_name": obj.team_name,
                 "team_description": obj.team_description,
                 "team_leader": obj.team_leader,
@@ -540,7 +555,7 @@ const fetchEmployeeBadges = async (req, res) => {
           e.status = 400;
           throw e;
         }
-        var result=[];
+        var result = [];
         data.forEach(obj => {
           if (result[0]) {
             var exist_or_not = 0;
@@ -597,7 +612,7 @@ const fetchEmployeeBadges = async (req, res) => {
                   "received_at": obj.receieved_at
                 }],
                 "unselected_badge": []
-              })           
+              })
             } else {
               result.push({
                 "emp_id": obj.emp_id,
@@ -636,7 +651,7 @@ const fetchEmployeeBadges = async (req, res) => {
 
 
 //Fetch Badges for an Employee
-const fetchBadgeForEmployee=async (req,res)=>{
+const fetchBadgeForEmployee = async (req, res) => {
   let e = new Error()
   try {
     await connection.query(`select e.emp_id, e.first_name, e.last_name, eb.receieved_at, b.id, b.name, b.description 
@@ -656,7 +671,7 @@ const fetchBadgeForEmployee=async (req,res)=>{
           e.status = 400;
           throw e;
         }
-        var result=[];
+        var result = [];
         data.forEach(obj => {
           if (result[0]) {
             var exist_or_not = 0;
@@ -713,7 +728,7 @@ const fetchBadgeForEmployee=async (req,res)=>{
                   "received_at": obj.receieved_at
                 }],
                 "unselected_badge": []
-              })           
+              })
             } else {
               result.push({
                 "emp_id": obj.emp_id,
@@ -793,7 +808,7 @@ const updateEmployeeBadge = async (req, res) => {
 }
 
 // Fetch Data - Announcement Module
-const fetchAnnouncements = async (req,res) => {
+const fetchAnnouncements = async (req, res) => {
   let e = new Error()
   try {
     await connection.query(`select e.first_name, e.last_name, e.email, e.emp_type, et.type_name as 'employee_position',
@@ -817,7 +832,7 @@ const fetchAnnouncements = async (req,res) => {
   }
 }
 
-const postAnnouncement = async (req,res)=>{
+const postAnnouncement = async (req, res) => {
   let e = new Error()
   try {
     validate_announcement.validateAnnouncement(req.body);
@@ -828,7 +843,7 @@ const postAnnouncement = async (req,res)=>{
         e.status = 400;
         throw e;
       }
-      if(data.affectedRows){
+      if (data.affectedRows) {
         return res.status(200).json({ data: true, message: `announcement added`, status: true });
       } else {
         return res.status(400).json({ data: false, message: `announcement didn't update`, status: false });
@@ -842,22 +857,22 @@ const postAnnouncement = async (req,res)=>{
   }
 }
 
-const deleteAnnouncement = async (req,res)=>{
+const deleteAnnouncement = async (req, res) => {
   let e = new Error()
   try {
     await connection.query(`delete from announcement where id=${req.body.post_id} and posted_by=${req.employee[0].emp_id};`,
-     (err, data) => {
-      if (err) {
-        e.message = "Something went wrong";
-        e.status = 400;
-        throw e;
-      }
-      if(data.affectedRows){
-        return res.status(200).json({ data: true, message: `Announcement Deleted`, status: true });
-      } else {
-        return res.status(400).json({ data: false, message: `Couldn't delete announcement. Try again!`, status: false });
-      }
-    })
+      (err, data) => {
+        if (err) {
+          e.message = "Something went wrong";
+          e.status = 400;
+          throw e;
+        }
+        if (data.affectedRows) {
+          return res.status(200).json({ data: true, message: `Announcement Deleted`, status: true });
+        } else {
+          return res.status(400).json({ data: false, message: `Couldn't delete announcement. Try again!`, status: false });
+        }
+      })
   } catch (e) {
     console.log(`Error: `, e);
     return res
@@ -866,7 +881,9 @@ const deleteAnnouncement = async (req,res)=>{
   }
 }
 
-module.exports = { login, create_employee, profile, leavesGet, leavesRequest, leavesRaised, 
+module.exports = {
+  login, create_employee, profile, leavesGet, leavesRequest, leavesRaised,
   leavesRequestsReceived, leavesApproveReject, dailystandupform,
   fetchStandupForm, fetchStandupFormManager, fetchEmployeeBadges, fetchBadgeForEmployee,
-  fetchAnnouncements, postAnnouncement,deleteAnnouncement,updateEmployeeBadge }
+  fetchAnnouncements, postAnnouncement, deleteAnnouncement, updateEmployeeBadge
+}
