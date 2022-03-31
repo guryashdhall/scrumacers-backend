@@ -7,20 +7,13 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 describe("Testing of Badge Module", () => {
-  before(function (done) {
-    if (app.isDbConnected) { 
-      process.nextTick(done)
-    } else {
-      app.on('ready', () => done());
-    }
-  });
+ 
   beforeEach(() => {
     data = {
       emp_id: 7,
       badge_id: [1, 2]
     }
   })
-
 
   it("Testing for insert/update badge", (done) => {
 

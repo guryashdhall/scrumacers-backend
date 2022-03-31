@@ -9,13 +9,6 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 describe("Testing of Scrum form fucntionality", () => {
-  before(function (done) {
-    if (app.isDbConnected) { 
-      process.nextTick(done)
-    } else {
-      app.on('ready', () => done());
-    }
-  })
     beforeEach(() => {
       data = {
        q1 : "I completed all the api's for dev",
