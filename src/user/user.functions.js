@@ -910,7 +910,7 @@ const surveyform = async (req, res) => {
   try {
     validate_survey.validateSurvey(req.body);
     await connection.query(`INSERT INTO survey_form (question_1,question_2,question_3,posted_by)
-  values (${req.body.question_1},${req.body.question_2},${req.body.question_3},${req.employee[0].emp_id});`,
+  values ("${req.body.question_1}","${req.body.question_2}","${req.body.question_3}",${req.employee[0].emp_id});`,
     (err, data) => {
       if (err) {
         e.message = "something went wrong";
@@ -920,7 +920,7 @@ const surveyform = async (req, res) => {
       if (data.affectedRows) {
         return res.status(200).json({ data: true, message: `Survey Questions are added`, status: true });
       } else {
-        return res.status(400).json({ data: false, message: `Survey Questions were not added, Please try again !`, status: false });
+        return res.status(400).json({ data: false, message: `Survey Questions were not added, Please try again!`, status: false });
       }
     })
   } catch (e) {

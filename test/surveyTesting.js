@@ -1,6 +1,10 @@
 const validate_survey = require("../src/validation/validateSurvey");
 var assert = require('assert');
-
+require('dotenv').config()
+const app = require("../index");
+const chai = require("chai");
+const chaiHttp = require("chai-http");
+let should = chai.should();
 
 describe("Testing of Survey fucntionality", () => {
     beforeEach(() => {
@@ -14,4 +18,12 @@ describe("Testing of Survey fucntionality", () => {
       data.q1 = ""
       assert.throws(function() { validate_survey.validateSurvey(data) }, /^Error: Question 1 cannot be empty$/);
     })
+    it("Testing for Survey Form submission by Manager", (done) => {
+        chai.request(app).post('/api/user/add-survey').set('Authorization',`Bearer ${process.env.MANAGER_TEST_TOKEN}`)
+        .send(data).end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.have.property("message").eqls("Survey Questions are added");
+          done();
+        })
+      })
   })
