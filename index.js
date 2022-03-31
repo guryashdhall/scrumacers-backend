@@ -48,8 +48,9 @@ app.get('/', function (req, res) {
 const port = process.env.PORT || 4000;
 
 // Create DB connection before listening on a port
-createDBConnection(db_credentials).then(()=>{
+createDBConnection(db_credentials).then(() => {
   app.emit('ready')
+  app.isDbConnected = true
   app.listen(port, function () {
     console.log('Scrum Acers Backend app listening on port ' + port);
   });

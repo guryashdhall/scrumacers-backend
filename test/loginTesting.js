@@ -8,6 +8,13 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 describe("POST api/user/login", () => {
+  before(function (done) {
+    if (app.isDbConnected) { 
+      process.nextTick(done)
+    } else {
+      app.on('ready', () => done());
+    }
+  })
   beforeEach(() => {
     data = {
       email: "jackryan@gmail.com",
