@@ -54,6 +54,8 @@ createDBConnection(db_credentials).then(() => {
   app.listen(port, function () {
     console.log('Scrum Acers Backend app listening on port ' + port);
   });
+}).catch((err)=>{
+  console.log("Error occured while creating DB connection "+err.message)
 })
 
 module.exports = app;
