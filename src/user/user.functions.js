@@ -3,6 +3,7 @@ const validate_standup_form = require('../validation/validate_scrum_form');
 const validate_announcement = require('../validation/validateAnnouncement');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
+const validate_survey  = require('../validation/validateSurvey');
 // Code that could be  used in future.
 const create_employee = async (req, res) => {
   try {
@@ -903,9 +904,36 @@ const fetchNotifications = async (req, res) => {
   }
 }
 
+//Function to create survey form
+const surveyform = async (req, res) => {
+  let e = new Error()
+  try {
+    validate_survey.validateSurvey(req.body);
+    await connection.query(`INSERT INTO survey_form (question_1,question_2,question_3,posted_by)
+  values (${req.body.question_1},${req.body.question_2},${req.body.question_3},${req.employee[0].emp_id});`,
+    (err, data) => {
+      if (err) {
+        e.message = "something went wrong";
+        e.status = 400;
+        throw e;
+      }
+      if (data.affectedRows) {
+        return res.status(200).json({ data: true, message: `Survey Questions are added`, status: true });
+      } else {
+        return res.status(400).json({ data: false, message: `Survey Questions were not added, Please try again !`, status: false });
+      }
+    })
+  } catch (e) {
+    console.log(`Error: `, e);
+    return res
+      .status(400)
+      .json({ data: false, message: `fail`, status: false });
+  }
+}
+
 module.exports = {
   login, create_employee, profile, leavesGet, leavesRequest, leavesRaised,
   leavesRequestsReceived, leavesApproveReject, dailystandupform,
   fetchStandupForm, fetchStandupFormManager, fetchEmployeeBadges, fetchBadgeForEmployee,
-  fetchAnnouncements, postAnnouncement, deleteAnnouncement, updateEmployeeBadge,fetchNotifications
+  fetchAnnouncements, postAnnouncement, deleteAnnouncement, updateEmployeeBadge,fetchNotifications,surveyform
 }
