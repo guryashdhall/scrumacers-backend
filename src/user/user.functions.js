@@ -769,7 +769,6 @@ const fetchBadgeForEmployee = async (req, res) => {
 const updateEmployeeBadge = async (req, res) => {
   let e = new Error()
   try {
-    validate_announcement.validateAnnouncement(req.body);
     await connection.query(`delete from employee_badge where employee_id=${req.body.emp_id};`
       , async (err, data) => {
         if (err) {
