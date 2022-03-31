@@ -15,7 +15,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions))
 
-// Database Credentials
+// Setting up Database Credentials based on Environment
 let db_credentials = {}
 
 if (process.env.NODE_ENV === 'development') {
@@ -38,9 +38,6 @@ if (process.env.NODE_ENV === 'testing') {
   }
 }
 
-// Database Connection
-createDBConnection(db_credentials)
-
 // Routes
 app.use("/api/user", userroutes);
 
@@ -49,8 +46,11 @@ app.get('/', function (req, res) {
 });
 
 const port = process.env.PORT || 4000;
-app.listen(port, function () {
-  console.log('Scrum Acers Backend app listening on port ' + port);
-});
 
-module.exports = app;
+// Create DB connection before listening on a port
+createDBConnection(db_credentials).then(()=>{
+  app.emit('ready')
+  app.listen(port, function () {
+    console.log('Scrum Acers Backend app listening on port ' + port);
+  });
+})
