@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "set NODE_ENV=development&& nodemon index.js",
-    "test": "set NODE_ENV=testing&& nyc mocha ./test/* --timeout 20000 --exit && nyc report --reporter=lcov"
+    "test": "set NODE_ENV=testing&& nyc mocha ./test/* --timeout 40000 --exit && nyc report --reporter=lcov"
   },
   "author": "Group 7",
   "license": "ISC",

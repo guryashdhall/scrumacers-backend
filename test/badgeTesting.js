@@ -7,9 +7,13 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 describe("Testing of Badge Module", () => {
-  before(done => {
-    app.on('ready', () => done());
-  })
+  before(function (done) {
+    if (app.isDbConnected) { 
+      process.nextTick(done)
+    } else {
+      app.on('ready', () => done());
+    }
+  });
   beforeEach(() => {
     data = {
       emp_id: 7,
@@ -19,7 +23,7 @@ describe("Testing of Badge Module", () => {
 
 
   it("Testing for insert/update badge", (done) => {
-    
+
     chai.request(app).put('/api/user/update-employee-badges').set('Authorization', `Bearer ${process.env.MANAGER_TEST_TOKEN}`)
       .send(data).end((err, res) => {
         res.should.have.status(200);
