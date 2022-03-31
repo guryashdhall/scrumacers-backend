@@ -54,3 +54,5 @@ createDBConnection(db_credentials).then(()=>{
     console.log('Scrum Acers Backend app listening on port ' + port);
   });
 })
+
+module.exports = app;
