@@ -4,6 +4,8 @@ const validate_announcement = require('../validation/validateAnnouncement');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const validate_survey = require('../validation/validateSurvey');
+const validate_email = require('../validation/general')
+const util = require('../auth/util');
 // Code that could be  used in future.
 const create_employee = async (req, res) => {
   try {
@@ -91,38 +93,6 @@ const fetchStandupForm = async (req, res) => {
 
   }
 }
-
-// const login = async (req, res) => {
-//   const { isValid, errorMessage } = validate_login.validateLogin(req.body);
-//   if (!isValid) {
-//     return res
-//       .status(400)
-//       .json({ message: "fail", status: false, error: errorMessage });
-//   }
-//   try {
-//     console.log("Conn: ", connection)
-//     console.log(typeof connection.query)
-//     await connection.query('SELECT * FROM assignment1.book;', (err, data) => {
-//       if (err) throw new Error(err);
-//       return res.status(200).json({ 'auth': true, 'data': data });
-//     });
-//     // if (result) {
-//     //   console.log("Result: ", result)
-//     //   return res
-//     //     .status(200)
-//     //     .json({ data: result[0], message: `Login functionality`, status: true });
-
-//     // }
-//     // console.log(result)
-//     // return res.status(400).json({ data: false, message: "Fail", status: false })
-//   } catch (e) {
-//     console.log(e);
-//     return res
-//       .status(400)
-//       .json({ data: false, message: `fail`, status: false });
-//   }
-// };
-
 
 // Login functionality
 const login = async (req, res) => {
@@ -928,10 +898,61 @@ const surveyform = async (req, res) => {
   }
 }
 
+const forgetPassword = async (req, res) => {
+  let e = new Error();
+  try {
+    if (!validate_email.validateEmail(req.body.email)) {
+      return res.status(400).json({ data: false, message: "Invalid email", status: false })
+    } else {
+      await connection.query(`select * from employee where email="${req.body.email}"`, async (err, data) => {
+        if (err) {
+          e.message = "something went wrong";
+          e.status = 400;
+          throw e;
+        } else if (data.length) {
+          await connection.query('start transaction;');
+          const new_password = util.passwordGenerator(10, 'aA#!');
+          const salt = bcrypt.genSaltSync(10);
+          const password = bcrypt.hashSync(new_password, salt);
+          const result = await connection.query(
+            `update employee set password = "${password}" where emp_id=${data[0].emp_id}`
+          );
+          if (result.affectedRows) {
+            let send_data = {
+              password: new_password,
+              email: data[0]['email']
+            };
+            await util.sendEmailTemporaryPassword(send_data);
+            await connection.query('commit;');
+            return res.status(200).json({
+              data: true,
+              message: `Temporary password has been sent`,
+              status: true,
+            });
+          } else {
+            connection.query('rollback;')
+            return res.status(400).json({
+              data: false,
+              message: `something went wrong`,
+              status: false,
+            });
+          }
+        } else {
+          return res.status(400).json({ data: false, message: 'User does not exist', status: ture });
+        }
+      })
+    }
+  } catch (e) {
+    return res
+      .status(400)
+      .json({ data: false, message: `fail`, status: false });
+  }
+}
+
 module.exports = {
   login, create_employee, profile, leavesGet, leavesRequest, leavesRaised,
   leavesRequestsReceived, leavesApproveReject, dailystandupform,
   fetchStandupForm, fetchStandupFormManager, fetchEmployeeBadges, fetchBadgeForEmployee,
   fetchAnnouncements, postAnnouncement, deleteAnnouncement, updateEmployeeBadge, fetchNotifications,
-  surveyform
+  surveyform, forgetPassword
 }
