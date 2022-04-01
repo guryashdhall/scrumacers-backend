@@ -3,18 +3,16 @@ const validate_standup_form = require('../validation/validate_scrum_form');
 const validate_announcement = require('../validation/validateAnnouncement');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
-const validate_survey= require('../validation/validateSurvey');
+const validate_survey = require('../validation/validateSurvey');
 // Code that could be  used in future.
 const create_employee = async (req, res) => {
   try {
-    console.log("Signup functionality!")
     const salt = bcrypt.genSaltSync(10);
     const password = bcrypt.hashSync(req.body.password, salt);
     return res
       .status(200)
       .json({ data: { requestbody: req.body, password }, message: `signup functionality`, status: true });
   } catch (e) {
-    console.log(`Error: `, e);
     return res
       .status(400)
       .json({ data: false, message: `fail`, status: false });
@@ -63,7 +61,6 @@ const dailystandupform = async (req, res) => {
       }
     })
   } catch (e) {
-    console.log(`Error: `, e);
     return res
       .status(400)
       .json({ data: false, message: `fail`, status: false });
@@ -88,7 +85,6 @@ const fetchStandupForm = async (req, res) => {
       }
     })
   } catch (e) {
-    console.log(`Error: `, e);
     return res
       .status(400)
       .json({ data: false, message: `fail`, status: false });
@@ -180,8 +176,6 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Employee not found", status: false, data: false });
     });
   } catch (e) {
-    console.log(e);
-    // return res.json({ "error_status": e.status, "error_message": e.message })
     return res.status(400).json({ data: false, message: 'fail', status: false });
   }
 };
@@ -313,7 +307,6 @@ const profile = async (req, res) => {
       }
     })
   } catch (e) {
-    console.log(e)
     return res.status(400).json({ data: false, message: "fail", status: false })
   }
 }
@@ -342,7 +335,6 @@ const leavesGet = async (req, res) => {
       }
     })
   } catch (e) {
-    console.log(e)
     return res.status(400).json({ data: false, message: "Request Failed", status: false })
   }
 }
@@ -374,7 +366,6 @@ const leavesRaised = async (req, res) => {
       }
     })
   } catch (e) {
-    console.log(e)
     return res.status(400).json({ data: false, message: "Request Failed", status: false })
   }
 }
@@ -406,7 +397,6 @@ const leavesRequestsReceived = async (req, res) => {
       }
     })
   } catch (e) {
-    console.log(e)
     return res.status(400).json({ data: false, message: "Request Failed", status: false })
   }
 }
@@ -428,7 +418,6 @@ const leavesApproveReject = async (req, res) => {
         if (req.body.status === 'approved') {
           await connection.query(`update employee set num_of_leaves=num_of_leaves-${days} where emp_id='${req.body.employee_id}';`, (err2, data2) => {
             if (err2) {
-              console.log(err2)
               let error = new Error("Failed to deduct employee's leaves");
               error.status = 400;
               throw error;
@@ -475,7 +464,6 @@ const leavesApproveReject = async (req, res) => {
       }
     })
   } catch (e) {
-    console.log(e)
     return res.status(400).json({ data: false, message: "Request Failed", status: false })
   }
 }
@@ -504,7 +492,6 @@ const leavesRequest = async (req, res) => {
       }
     })
   } catch (e) {
-    console.log(e)
     return res.status(400).json({ data: false, message: "Request Failed", status: false })
   }
 }
@@ -513,7 +500,7 @@ const leavesRequest = async (req, res) => {
 const fetchStandupFormManager = async (req, res) => {
   let e = new Error()
   try {
-    await connection.query(`SELECT * FROM  CSCI5308_7_DEVINT.scrum_form WHERE team_id = ${req.employee[0].team_id} 
+    await connection.query(`SELECT * FROM  scrum_form WHERE team_id = ${req.employee[0].team_id} 
   and DATE(creation_timestamp) = CURDATE();`, (err, data) => {
       if (err) {
         e.message = "something went wrong";
@@ -527,7 +514,6 @@ const fetchStandupFormManager = async (req, res) => {
       }
     })
   } catch (e) {
-    console.log(`Error: `, e);
     return res
       .status(400)
       .json({ data: false, message: `fail`, status: false });
@@ -637,13 +623,11 @@ const fetchEmployeeBadges = async (req, res) => {
           })
           element.unselected_badge = temp_badge
         })
-
         return res.status(200).json(result);
       })
       return res.status(400).send("Something's not alright");
     })
   } catch (e) {
-    console.log(`Error: `, e);
     return res
       .status(400)
       .json({ data: false, message: `fail`, status: false });
@@ -753,13 +737,11 @@ const fetchBadgeForEmployee = async (req, res) => {
           })
           element.unselected_badge = temp_badge
         })
-
         return res.status(200).json(result);
       })
       return res.status(400).send("Something's not alright");
     })
   } catch (e) {
-    console.log(`Error: `, e);
     return res
       .status(400)
       .json({ data: false, message: `fail`, status: false });
@@ -800,7 +782,6 @@ const updateEmployeeBadge = async (req, res) => {
         }
       })
   } catch (e) {
-    console.log(`Error: `, e);
     return res
       .status(400)
       .json({ data: false, message: `Fail`, status: false });
@@ -825,7 +806,6 @@ const fetchAnnouncements = async (req, res) => {
       return res.status(200).json({ data, message: `announcements fetched`, status: true });
     })
   } catch (e) {
-    console.log(`Error: `, e);
     return res
       .status(400)
       .json({ data: false, message: `fail`, status: false });
@@ -850,7 +830,6 @@ const postAnnouncement = async (req, res) => {
       }
     })
   } catch (e) {
-    console.log(`Error: `, e);
     return res
       .status(400)
       .json({ data: false, message: `fail`, status: false });
@@ -874,7 +853,6 @@ const deleteAnnouncement = async (req, res) => {
         }
       })
   } catch (e) {
-    console.log(`Error: `, e);
     return res
       .status(400)
       .json({ data: false, message: `Something went wrong`, status: false });
@@ -883,7 +861,7 @@ const deleteAnnouncement = async (req, res) => {
 
 // Fetch Notifications
 const fetchNotifications = async (req, res) => {
-  let e= new Error();
+  let e = new Error();
   try {
     await connection.query(`select * from notification where notification_receiver=${req.employee[0].emp_id} 
       order by notification_sent_timestamp desc;`,
@@ -897,7 +875,6 @@ const fetchNotifications = async (req, res) => {
       }
     )
   } catch (e) {
-    console.log(`Error: `, e);
     return res
       .status(400)
       .json({ data: false, message: `Something went wrong`, status: false });
@@ -929,7 +906,6 @@ const surveyform = async (req, res) => {
             insert_query += `;`;
             await connection.query(insert_query, (err, data) => {
               if (err) {
-                console.log(err)
                 e.message = "something went wrong";
                 e.status = 400;
                 throw e;
@@ -946,7 +922,6 @@ const surveyform = async (req, res) => {
         }
       })
   } catch (e) {
-    console.log(`Error: `, e);
     return res
       .status(400)
       .json({ data: false, message: `fail`, status: false });
@@ -957,6 +932,6 @@ module.exports = {
   login, create_employee, profile, leavesGet, leavesRequest, leavesRaised,
   leavesRequestsReceived, leavesApproveReject, dailystandupform,
   fetchStandupForm, fetchStandupFormManager, fetchEmployeeBadges, fetchBadgeForEmployee,
-  fetchAnnouncements, postAnnouncement, deleteAnnouncement, updateEmployeeBadge, fetchNotifications, 
+  fetchAnnouncements, postAnnouncement, deleteAnnouncement, updateEmployeeBadge, fetchNotifications,
   surveyform
 }

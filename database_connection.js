@@ -5,7 +5,6 @@ function createDBConnection(db_data) {
      console.log("Connected to database succesfully");
      global.connection=conn;    
   }).catch((err)=>{    
-    console.log(process.env.HEROKU_APP_BACKEND+" "+err)
     let error=new Error("Error connecting to database");
     error.status=400;
     throw error;
