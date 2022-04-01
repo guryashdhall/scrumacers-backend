@@ -15,3 +15,14 @@ describe("Testing of Profile Module", () => {
             })
     })
 })
+
+describe("Testing of Signup Module", () => {
+    it("Testing for signup api", (done) => {
+        chai.request(app).post('/api/user/signup').send({password:'abcabc'})
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.have.property("message").eqls("signup functionality");
+                done();
+            })
+    })
+})
