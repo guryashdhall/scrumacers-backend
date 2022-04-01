@@ -49,5 +49,15 @@ describe("Testing of Survey fucntionality", () => {
     res.body.should.have.property("message").eqls("Survey Details fetched");
     done();
   })
+}) 
+
+it("Testing for fetch survey form-manager", (done) => {
+  chai.request(app).get('/api/user/fetch-survey-manager').set('Authorization',`Bearer ${process.env.MANAGER_TEST_TOKEN}`)
+  .end((err, res) => {
+    res.should.have.status(200);
+    res.body.should.have.property("message").eqls("Survey Details fetched for employees");
+    done();
+  })
 })  
+
   })

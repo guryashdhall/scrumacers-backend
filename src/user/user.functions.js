@@ -983,8 +983,8 @@ const fetchSurveyEmployee = async (req, res) => {
   try {
     await connection.query(`select s.*,employee_teamlead.first_name , employee_teamlead.last_name,
     es.hasSubmitted 
-    FROM CSCI5308_7_TEST.survey_form as s
-    left join CSCI5308_7_TEST.employee_survey as es
+    FROM survey_form as s
+    left join employee_survey as es
     on s.survey_id=es.survey_id	
     left join employee as e
     on es.employee_id =e.emp_id
@@ -1014,10 +1014,39 @@ const fetchSurveyEmployee = async (req, res) => {
   }
 }
 
+// Fetch Survey details for Manager
+const fetchSurveyManager = async (req, res) => {
+  let e = new Error();
+  try {
+    await connection.query(`select es.*,s.*,e.first_name as employee_firstname,e.last_name as employee_lastname
+	from employee_survey  as es
+	left join survey_form as s
+	on s.survey_id =es.survey_id
+	left join employee as e
+	on es.employee_id =e.emp_id
+	WHERE es.hasSubmitted =1
+	and s.posted_by =${req.employee[0].emp_id};`,
+      (err, data) => {
+        if (err) {
+          e.message = "Something went wrong";
+          e.status = 400;
+          throw e;
+        }
+        return res.status(200).json({ data: data, message: `Survey Details fetched for employees`, status: true });
+      }
+    )
+  } catch (e) {
+    console.log(`Error: `, e);
+    return res
+      .status(400)
+      .json({ data: false, message: `Something went wrong`, status: false });
+  }
+}
+
 module.exports = {
   login, create_employee, profile, leavesGet, leavesRequest, leavesRaised,
   leavesRequestsReceived, leavesApproveReject, dailystandupform,
   fetchStandupForm, fetchStandupFormManager, fetchEmployeeBadges, fetchBadgeForEmployee,
   fetchAnnouncements, postAnnouncement, deleteAnnouncement, updateEmployeeBadge, fetchNotifications,
-  surveyform, forgetPassword,fillsurveyform,fetchSurveyEmployee
+  surveyform, forgetPassword,fillsurveyform,fetchSurveyEmployee,fetchSurveyManager
 }
