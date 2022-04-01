@@ -1042,11 +1042,33 @@ const fetchSurveyManager = async (req, res) => {
       .json({ data: false, message: `Something went wrong`, status: false });
   }
 }
+// Fetch Survey details for Manager to get list of surveys
+const fetchSurveyListManager = async (req, res) => {
+  let e = new Error();
+  try {
+    await connection.query(`select * from survey_form
+	where posted_by =${req.employee[0].emp_id};`,
+      (err, data) => {
+        if (err) {
+          e.message = "Something went wrong";
+          e.status = 400;
+          throw e;
+        }
+        return res.status(200).json({ data: data, message: `Survey List fetched`, status: true });
+      }
+    )
+  } catch (e) {
+    console.log(`Error: `, e);
+    return res
+      .status(400)
+      .json({ data: false, message: `Something went wrong`, status: false });
+  }
+}
 
 module.exports = {
   login, create_employee, profile, leavesGet, leavesRequest, leavesRaised,
   leavesRequestsReceived, leavesApproveReject, dailystandupform,
   fetchStandupForm, fetchStandupFormManager, fetchEmployeeBadges, fetchBadgeForEmployee,
   fetchAnnouncements, postAnnouncement, deleteAnnouncement, updateEmployeeBadge, fetchNotifications,
-  surveyform, forgetPassword,fillsurveyform,fetchSurveyEmployee,fetchSurveyManager
+  surveyform, forgetPassword,fillsurveyform,fetchSurveyEmployee,fetchSurveyManager,fetchSurveyListManager
 }
