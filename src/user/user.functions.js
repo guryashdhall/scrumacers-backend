@@ -976,10 +976,48 @@ const fillsurveyform = async (req, res) => {
   }
 }
 
+
+// Fetch Survey details for Employee
+const fetchSurveyEmployee = async (req, res) => {
+  let e = new Error();
+  try {
+    await connection.query(`select s.*,employee_teamlead.first_name , employee_teamlead.last_name,
+    es.hasSubmitted 
+    FROM CSCI5308_7_TEST.survey_form as s
+    left join CSCI5308_7_TEST.employee_survey as es
+    on s.survey_id=es.survey_id	
+    left join employee as e
+    on es.employee_id =e.emp_id
+    left join team as t
+    on t.team_id =e.team_id
+    left join employee as employee_teamlead
+    on employee_teamlead.emp_id = s.posted_by
+     WHERE s.posted_by = t.team_leader
+     and es.hasSubmitted =0
+     and s.start_date < now() 
+     and s.end_date>now()
+     and es.employee_id = ${req.employee[0].emp_id};`,
+      (err, data) => {
+        if (err) {
+          e.message = "Something went wrong";
+          e.status = 400;
+          throw e;
+        }
+        return res.status(200).json({ data: data, message: `Survey Details fetched`, status: true });
+      }
+    )
+  } catch (e) {
+    console.log(`Error: `, e);
+    return res
+      .status(400)
+      .json({ data: false, message: `Something went wrong`, status: false });
+  }
+}
+
 module.exports = {
   login, create_employee, profile, leavesGet, leavesRequest, leavesRaised,
   leavesRequestsReceived, leavesApproveReject, dailystandupform,
   fetchStandupForm, fetchStandupFormManager, fetchEmployeeBadges, fetchBadgeForEmployee,
   fetchAnnouncements, postAnnouncement, deleteAnnouncement, updateEmployeeBadge, fetchNotifications,
-  surveyform, forgetPassword,fillsurveyform
+  surveyform, forgetPassword,fillsurveyform,fetchSurveyEmployee
 }
