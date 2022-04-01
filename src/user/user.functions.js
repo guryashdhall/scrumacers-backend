@@ -3,7 +3,7 @@ const validate_standup_form = require('../validation/validate_scrum_form');
 const validate_announcement = require('../validation/validateAnnouncement');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
-const validate_survey  = require('../validation/validateSurvey');
+const validate_survey= require('../validation/validateSurvey');
 // Code that could be  used in future.
 const create_employee = async (req, res) => {
   try {
@@ -883,7 +883,7 @@ const deleteAnnouncement = async (req, res) => {
 
 // Fetch Notifications
 const fetchNotifications = async (req, res) => {
-  let e=new Error();
+  let e= new Error();
   try {
     await connection.query(`select * from notification where notification_receiver=${req.employee[0].emp_id} 
       order by notification_sent_timestamp desc;`,
@@ -910,19 +910,41 @@ const surveyform = async (req, res) => {
   try {
     validate_survey.validateSurvey(req.body);
     await connection.query(`INSERT INTO survey_form (question_1,question_2,question_3,posted_by)
-  values ("${req.body.question_1}","${req.body.question_2}","${req.body.question_3}",${req.employee[0].emp_id});`,
-    (err, data) => {
-      if (err) {
-        e.message = "something went wrong";
-        e.status = 400;
-        throw e;
-      }
-      if (data.affectedRows) {
-        return res.status(200).json({ data: true, message: `Survey Questions are added`, status: true });
-      } else {
-        return res.status(400).json({ data: false, message: `Survey Questions were not added, Please try again!`, status: false });
-      }
-    })
+  values ("${req.body.q1}","${req.body.q2}","${req.body.q3}",${req.employee[0].emp_id});`,
+      async (err, data) => {
+        if (err) {
+          e.message = "something went wrong";
+          e.status = 400;
+          throw e;
+        }
+        if (data.affectedRows) {
+          const employees = await connection.query(`select e.emp_id from employee as e where 
+        e.team_id=(select team_id from employee where employee.emp_id=${req.employee[0].emp_id}) 
+        and e.emp_id!=${req.employee[0].emp_id};`)
+          if (employees.length) {
+            var insert_query = `insert into employee_survey (survey_id,employee_id) values (${data.insertId},${employees[0].emp_id})`;
+            for (i = 1; i < employees.length; i++) {
+              insert_query += `,(${data.insertId},${employees[i].emp_id})`;
+            }
+            insert_query += `;`;
+            await connection.query(insert_query, (err, data) => {
+              if (err) {
+                console.log(err)
+                e.message = "something went wrong";
+                e.status = 400;
+                throw e;
+              }
+              return res.status(200).json({ data: true, message: 'Survey added successfully', status: true });
+            }
+            )
+          } else {
+            return res.status(200).json({ data: true, message: 'Survey added successfully', status: true });
+          }
+        } else {
+          return res.status(400)
+            .json({ data: false, message: `Survey Questions were not added, Please try again !`, status: false });
+        }
+      })
   } catch (e) {
     console.log(`Error: `, e);
     return res
@@ -935,5 +957,6 @@ module.exports = {
   login, create_employee, profile, leavesGet, leavesRequest, leavesRaised,
   leavesRequestsReceived, leavesApproveReject, dailystandupform,
   fetchStandupForm, fetchStandupFormManager, fetchEmployeeBadges, fetchBadgeForEmployee,
-  fetchAnnouncements, postAnnouncement, deleteAnnouncement, updateEmployeeBadge,fetchNotifications,surveyform
+  fetchAnnouncements, postAnnouncement, deleteAnnouncement, updateEmployeeBadge, fetchNotifications, 
+  surveyform
 }

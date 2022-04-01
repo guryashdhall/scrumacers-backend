@@ -22,7 +22,7 @@ describe("Testing of Survey fucntionality", () => {
         chai.request(app).post('/api/user/add-survey').set('Authorization',`Bearer ${process.env.MANAGER_TEST_TOKEN}`)
         .send(data).end((err, res) => {
           res.should.have.status(200);
-          res.body.should.have.property("message").eqls("Survey Questions are added");
+          res.body.should.have.property("message").eqls("Survey added successfully");
           done();
         })
       })
