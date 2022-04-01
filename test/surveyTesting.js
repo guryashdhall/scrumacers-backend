@@ -26,4 +26,19 @@ describe("Testing of Survey fucntionality", () => {
           done();
         })
       })
+          
+  it("Testing if survey form is filled or not?", (done) => {
+    data = {
+        answer_1 : "The team was able to complete all the tasks within time",
+        answer_2 : "The team can reduce the number of meetings by notifying the dependencies using the tool",
+        answer_3 : "We will complete the backend of Scrum Acers in the next sprint",
+        survey_id: 2
+       }
+    chai.request(app).post('/api/user/fill-survey').set('Authorization',`Bearer ${process.env.EMPLOYEE_TEST_TOKEN}`)
+    .send(data).end((err, res) => {
+      res.should.have.status(200);
+      res.body.should.have.property("message").eqls("Survey was filled by the Employee");
+      done();
+    })
+  })
   })

@@ -23,5 +23,6 @@ router.put('/delete-announcement', authentication.isAuthenticated, functions.del
 router.get('/fetch-notifications',authentication.isAuthenticated, functions.fetchNotifications);
 router.post('/add-survey',authentication.isAuthenticated, functions.surveyform);
 router.put('/forget-password', functions.forgetPassword);
-  
+router.post('/fill-survey',authentication.isAuthenticated, functions.fillsurveyform);
+
 module.exports = router;
