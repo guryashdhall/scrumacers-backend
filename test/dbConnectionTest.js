@@ -5,9 +5,9 @@ describe("Testing of DB", () => {
   beforeEach(() => {
     data = {
       host: "db-5308.cs.dal.ca",
-      user: "CSCI5308_7_DEVINT_USER",
+      user: "CSCI5308_7_TEST",
       password: "thu8oLahcoo3xaok",
-      database: "CSCI5308_7_DEVINT",
+      database: "CSCI5308_7_TEST",
       port: "3306",
     };
   });

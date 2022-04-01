@@ -47,7 +47,6 @@ const isAuthenticated = (req, res, next) => {
       });
     }
   } catch (e) {
-    console.log(e);
     return res.status(400).json({
       data: false,
       message: "fail",

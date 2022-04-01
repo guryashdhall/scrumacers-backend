@@ -40,5 +40,29 @@ describe("Testing of Scrum form fucntionality", () => {
         res.body.should.have.property("message").eqls("Form fetched Successfully");
         done();
       })
-    })
+    })  
+    it("Testing for fetch standup form for manager", (done) => {
+      chai.request(app).get('/api/user/fetchStandupFormManager').set('Authorization',`Bearer ${process.env.MANAGER_TEST_TOKEN}`)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.have.property("message").eqls("Form fetched Successfully");
+        done();
+      })
+    }) 
+    it("Testing for authorization in fetch standup form for manager", (done) => {
+      chai.request(app).get('/api/user/fetchStandupFormManager')
+      .end((err, res) => {
+        res.should.have.status(401);
+        res.body.should.have.property("message").eqls("Access Denied! Unauthorized User");
+        done();
+      })
+    }) 
+    it("Testing for invalid token in fetch standup form for manager", (done) => {
+      chai.request(app).get('/api/user/fetchStandupFormManager').set("Authorization","Bearer acacanksvdkvskvs")
+      .end((err, res) => {
+        res.should.have.status(401);
+        res.body.should.have.property("message").eqls("Invalid Token...");
+        done();
+      })
+    }) 
   })
