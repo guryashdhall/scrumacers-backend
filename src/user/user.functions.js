@@ -948,11 +948,38 @@ const forgetPassword = async (req, res) => {
       .json({ data: false, message: `fail`, status: false });
   }
 }
+// Function for employees within a team to fill the survey form
+
+const fillsurveyform = async (req, res) => {
+  let e = new Error()
+  try {
+    await connection.query(`update employee_survey set answer_1 ="${req.body.answer_1}" ,
+    answer_2 ="${req.body.answer_2}" , answer_3 ="${req.body.answer_3}",hasSubmitted =1,creation_timestamp=now()
+    where survey_id = ${req.body.survey_id} and employee_id = ${req.employee[0].emp_id};`,
+      (err, data) => {
+        if (err) {
+          e.message = "something went wrong";
+          e.status = 400;
+          throw e;
+        }
+        if (data.affectedRows) {
+          return res.status(200).json({ data: true, message: `Survey was filled by the Employee`, status: true });
+        } else {
+          return res.status(400).json({ data: false, message: `Error updating survey, try again!`, status: false });
+        }
+      })
+  } catch (e) {
+    console.log(`Error: `, e);
+    return res
+      .status(400)
+      .json({ data: false, message: `fail`, status: false });
+  }
+}
 
 module.exports = {
   login, create_employee, profile, leavesGet, leavesRequest, leavesRaised,
   leavesRequestsReceived, leavesApproveReject, dailystandupform,
   fetchStandupForm, fetchStandupFormManager, fetchEmployeeBadges, fetchBadgeForEmployee,
   fetchAnnouncements, postAnnouncement, deleteAnnouncement, updateEmployeeBadge, fetchNotifications,
-  surveyform, forgetPassword
+  surveyform, forgetPassword,fillsurveyform
 }
