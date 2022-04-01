@@ -69,4 +69,12 @@ it("Testing for fetch survey form-manager", (done) => {
   })
 })  
 
+it("Testing for fetch survey list for manager", (done) => {
+  chai.request(app).get('/api/user/fetch-survey-list-manager').set('Authorization',`Bearer ${process.env.MANAGER_TEST_TOKEN}`)
+  .end((err, res) => {
+    res.should.have.status(200);
+    res.body.should.have.property("message").eqls("Survey List fetched");
+    done();
+  })
+})  
   })
