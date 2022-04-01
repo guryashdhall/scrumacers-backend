@@ -22,5 +22,6 @@ router.put('/update-employee-badges', authentication.isAuthenticated, functions.
 router.put('/delete-announcement', authentication.isAuthenticated, functions.deleteAnnouncement);
 router.get('/fetch-notifications',authentication.isAuthenticated, functions.fetchNotifications);
 router.post('/add-survey',authentication.isAuthenticated, functions.surveyform);
+router.put('/forget-password', functions.forgetPassword);
   
 module.exports = router;
