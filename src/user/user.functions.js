@@ -856,8 +856,8 @@ const surveyform = async (req, res) => {
   let e = new Error()
   try {
     validate_survey.validateSurvey(req.body);
-    await connection.query(`INSERT INTO survey_form (question_1,question_2,question_3,posted_by)
-  values ("${req.body.q1}","${req.body.q2}","${req.body.q3}",${req.employee[0].emp_id});`,
+    await connection.query(`INSERT INTO survey_form (survey_title,question_1,question_2,question_3,posted_by)
+  values ("${req.body.survey_title}","${req.body.q1}","${req.body.q2}","${req.body.q3}",${req.employee[0].emp_id});`,
       async (err, data) => {
         if (err) {
           e.message = "something went wrong";
