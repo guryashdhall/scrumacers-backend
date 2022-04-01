@@ -24,5 +24,6 @@ router.get('/fetch-notifications',authentication.isAuthenticated, functions.fetc
 router.post('/add-survey',authentication.isAuthenticated, functions.surveyform);
 router.put('/forget-password', functions.forgetPassword);
 router.post('/fill-survey',authentication.isAuthenticated, functions.fillsurveyform);
+router.get('/fetch-survey-employee',authentication.isAuthenticated, functions.fetchSurveyEmployee);
 
 module.exports = router;

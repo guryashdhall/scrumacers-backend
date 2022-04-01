@@ -26,7 +26,7 @@ describe("Testing of Survey fucntionality", () => {
           done();
         })
       })
-          
+
   it("Testing if survey form is filled or not?", (done) => {
     data = {
         answer_1 : "The team was able to complete all the tasks within time",
@@ -41,4 +41,13 @@ describe("Testing of Survey fucntionality", () => {
       done();
     })
   })
+
+ it("Testing for fetch survey form-employee", (done) => {
+  chai.request(app).get('/api/user/fetch-survey-employee').set('Authorization',`Bearer ${process.env.EMPLOYEE_TEST_TOKEN}`)
+  .end((err, res) => {
+    res.should.have.status(200);
+    res.body.should.have.property("message").eqls("Survey Details fetched");
+    done();
+  })
+})  
   })
