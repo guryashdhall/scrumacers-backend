@@ -1031,7 +1031,7 @@ const surveyform = async (req, res) => {
       .json({ data: false, message: `fail`, status: false });
   }
 }
-
+// Function for forgot password functionality
 const forgetPassword = async (req, res) => {
   let e = new Error();
   try {
@@ -1137,6 +1137,7 @@ const fetchSurveyEmployee = async (req, res) => {
           e.status = 400;
           throw e;
         }
+       
         return res.status(200).json({ data: data, message: `Survey Details fetched`, status: true });
       }
     )
@@ -1159,7 +1160,7 @@ const fetchSurveyManager = async (req, res) => {
 	left join employee as e
 	on es.employee_id =e.emp_id
 	WHERE es.hasSubmitted =1
-	and s.posted_by =${req.employee[0].emp_id};`,
+	and s.posted_by =${req.employee[0].emp_id} and es.survey_id=${req.body.survey_id};`,
       (err, data) => {
         if (err) {
           e.message = "Something went wrong";
@@ -1176,6 +1177,7 @@ const fetchSurveyManager = async (req, res) => {
       .json({ data: false, message: `Something went wrong`, status: false });
   }
 }
+
 // Fetch Survey details for Manager to get list of surveys
 const fetchSurveyListManager = async (req, res) => {
   let e = new Error();

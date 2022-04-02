@@ -13,7 +13,8 @@ describe("Testing of Survey fucntionality", () => {
        q1 : "The team was able to complete all the tasks within time",
        q2 : "The team can reduce the number of meetings by notifying the dependencies using the tool",
        q3 : "We will complete the backend of Scrum Acers in the next sprint",
-       survey_title : "Scrum Acers Survey 101"
+       survey_title : "Scrum Acers Survey 101",
+       survey_id: 4
       }
     })
 
@@ -62,7 +63,7 @@ describe("Testing of Survey fucntionality", () => {
 
 it("Testing for fetch survey form-manager", (done) => {
   chai.request(app).get('/api/user/fetch-survey-manager').set('Authorization',`Bearer ${process.env.MANAGER_TEST_TOKEN}`)
-  .end((err, res) => {
+  .send(data).end((err, res) => {
     res.should.have.status(200);
     res.body.should.have.property("message").eqls("Survey Details fetched for employees");
     done();
