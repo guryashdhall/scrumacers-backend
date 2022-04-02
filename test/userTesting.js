@@ -25,4 +25,26 @@ describe("Testing of Signup Module", () => {
                 done();
             })
     })
+    
+    describe("Testing of Create Employee function", () => {
+        before(() => {
+        data = {
+            first_name:"Aman",
+            last_name:"Ryan",
+            email: "amanryan@gmail.com",
+            password: "amanryan3",
+            emp_type:5,
+            team_id:2
+          }
+        })
+        it("Testing for create employee api", (done) => {
+                    chai.request(app).post('/api/user/create-employee').set('Authorization',`Bearer ${process.env.HR_TEST_TOKEN}`)
+            .send(data)
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.have.property("message").eqls("Employee created successfully");
+                    done();
+                })
+        })
+})
 })
