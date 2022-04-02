@@ -7,17 +7,132 @@ const validate_survey = require('../validation/validateSurvey');
 const validate_email = require('../validation/general')
 const util = require('../auth/util');
 // Code that could be  used in future.
-const create_employee = async (req, res) => {
+const create_employee = async (req, res) => {  
   try {
-    const salt = bcrypt.genSaltSync(10);
-    const password = bcrypt.hashSync(req.body.password, salt);
-    return res
-      .status(200)
-      .json({ data: { requestbody: req.body, password }, message: `signup functionality`, status: true });
+    if([1,2,3].indexOf(req.employee[0].emp_type)!==-1){
+      const salt = bcrypt.genSaltSync(10);
+      const password = bcrypt.hashSync(req.body.password, salt);
+      let query=`insert into employee values(null,"${req.body.first_name}","${req.body.last_name}","${req.body.email_id}","${password}","","${req.body.emp_type}",10,sysdate(),"${req.body.team_id}");`
+      await connection.query(query,
+       (err, data) => {
+         try{
+          if (err) {     
+            let e=new Error();     
+            e.message = "Something went wrong";
+            e.status = 400;
+            throw e;
+          }
+          else{
+            if(data.affectedRows){
+              return res.status(200).json({ data: true, message: `Employee created successfully`, status: true });
+            } else {
+              return res.status(400).json({ data: false, message: `Couldn't create employee. Try again later!`, status: false });
+            }
+          }  
+         } catch(e){
+          return res
+          .status(400)
+          .json({ data: false, message: e.message, status: false });
+         }
+            
+      })
+    }
+    else{
+      let e=new Error();
+      e.message = "You are not authorized to create employee!";
+      e.status = 400;
+      throw e;
+    }    
   } catch (e) {
     return res
       .status(400)
-      .json({ data: false, message: `fail`, status: false });
+      .json({ data: false, message: e.message, status: false });
+  }
+};
+
+const fetch_all_employees = async (req, res) => {
+  try {   
+    if([1,2,3].indexOf(req.employee[0].emp_type)!==-1){
+      let query=`select emp_id,first_name,last_name,email,emp_type,num_of_leaves,joining_datetime,team_id,type_name from employee a,`
+      +`employee_type b where a.emp_type=b.id and a.emp_id<>"${req.employee[0].emp_id}" and a.emp_type>"${req.employee[0].emp_type}"`
+      +` order by emp_id;`
+      await connection.query(query,
+       (err, data) => {
+        try{
+          if (err) {
+            let e=new Error();
+            e.message = "Something went wrong";
+            e.status = 400;
+            throw e;
+          }
+          else{
+            if(data.length){
+              return res.status(200).json({ data, message: `Employees fetched successfully`, status: true });
+            }
+            else{
+              return res.status(400).json({ data: false, message: `Couldn't fetch employees!`, status: false });
+            }
+          } 
+        } catch(e){
+          return res
+           .status(400)
+           .json({ data: false, message: e.message, status: false });
+        }             
+      })
+    }
+    else{
+      let e=new Error();
+      e.message = "You are not authorized to create employee!";
+      e.status = 400;
+      throw e;
+    }    
+  } catch (e) {
+    return res
+      .status(400)
+      .json({ data: false, message: e.message, status: false });
+  }
+};
+
+const delete_employee = async (req, res) => {
+  try {   
+    if([1,2,3].indexOf(req.employee[0].emp_type)!==-1){
+      let query=`SET FOREIGN_KEY_CHECKS=0; delete from employee where emp_id="${req.body.emp_id}"; delete from leave_information where employee_id="${req.body.emp_id}"; delete from employee_badge where employee_id="${req.body.emp_id}";`
+      await connection.query(query,
+       (err, data) => {
+         try{
+          if (err) {
+            console.log(err.message)
+            let e=new Error();
+            e.message = "Something went wrong";
+            e.status = 400;
+            throw e;
+          }
+          else{
+            if(data[1].affectedRows){
+              return res.status(200).json({ data, message: `Employee deleted successfully`, status: true });
+            }
+            else{
+              return res.status(400).json({ data: false, message: `Employee doesn't exist!`, status: false });
+            }
+          }
+         } catch(e){
+          return res
+            .status(400)
+            .json({ data: false, message: e.message, status: false });
+         }
+              
+      })
+    }
+    else{
+      let e=new Error();
+      e.message = "You are not authorized to delete employees";
+      e.status = 400;
+      throw e;
+    }    
+  } catch (e) {    
+    return res
+      .status(400)
+      .json({ data: false, message: e.message, status: false });
   }
 };
 
@@ -1065,8 +1180,7 @@ const fetchSurveyListManager = async (req, res) => {
   }
 }
 
-module.exports = {
-  login, create_employee, profile, leavesGet, leavesRequest, leavesRaised,
+module.exports = { login, create_employee, delete_employee, fetch_all_employees, profile, leavesGet, leavesRequest, leavesRaised, 
   leavesRequestsReceived, leavesApproveReject, dailystandupform,
   fetchStandupForm, fetchStandupFormManager, fetchEmployeeBadges, fetchBadgeForEmployee,
   fetchAnnouncements, postAnnouncement, deleteAnnouncement, updateEmployeeBadge, fetchNotifications,

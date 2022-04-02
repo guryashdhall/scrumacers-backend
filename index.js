@@ -24,7 +24,8 @@ if (process.env.NODE_ENV === 'development') {
     user: process.env.DATABASE_DEV_USERNAME,
     password: process.env.DATABASE_DEV_PASSWORD,
     database: process.env.DATABASE_DEV_DATABASE,
-    port: "3306"
+    port: "3306",
+    multipleStatements: true
   }
 }
 
@@ -34,7 +35,8 @@ if (process.env.NODE_ENV === 'testing') {
     user: process.env.DATABASE_TEST_USERNAME,
     password: process.env.DATABASE_TEST_PASSWORD,
     database: process.env.DATABASE_TEST_DATABASE,
-    port: "3306"
+    port: "3306",
+    multipleStatements: true
   }
 }
 

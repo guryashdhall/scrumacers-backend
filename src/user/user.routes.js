@@ -3,7 +3,9 @@ var router = express.Router();
 const functions = require('./user.functions');
 const authentication = require("../auth/authentication") // To use function authentication.isAuthenticated
 
-router.post("/signup", functions.create_employee);
+router.post("/create-employee", authentication.isAuthenticated, functions.create_employee);
+router.get("/fetch_all_employees", authentication.isAuthenticated, functions.fetch_all_employees);
+router.put("/delete_employee", authentication.isAuthenticated, functions.delete_employee);
 router.post("/login", functions.login);
 router.get("/profile", authentication.isAuthenticated, functions.profile);
 router.post("/dailyStandUpForm", authentication.isAuthenticated, functions.dailystandupform);
