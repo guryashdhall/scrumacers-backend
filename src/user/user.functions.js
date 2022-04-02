@@ -634,7 +634,7 @@ const fetchEmployeeBadges = async (req, res) => {
     on eb.employee_id=e.emp_id
     left join badge as b
     on eb.badge_id=b.id
-    where e.team_id=${req.employee[0].team_id} and e.emp_id!=${req.employee[0].emp_id};`, async (err, data) => {
+    where e.team_id=${req.employee[0].team_id} and e.emp_id!=${req.employee[0].emp_id} ORDER BY e.emp_id;`, async (err, data) => {
       if (err) {
         e.message = "something went wrong";
         e.status = 400;
