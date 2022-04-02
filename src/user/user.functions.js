@@ -585,8 +585,11 @@ const leavesRequest = async (req, res) => {
 const fetchStandupFormManager = async (req, res) => {
   let e = new Error()
   try {
-    await connection.query(`SELECT * FROM  scrum_form WHERE team_id = ${req.employee[0].team_id} 
-  and DATE(creation_timestamp) = CURDATE();`, (err, data) => {
+    await connection.query(`SELECT form_id,a.team_id,team_name,employee_id,first_name,last_name,ques_1,ques_2,ques_3,blocker,creation_timestamp
+      FROM  scrum_form a,team b, employee c 
+      WHERE a.team_id = ${req.employee[0].team_id} 
+      and a.team_id=b.team_id and a.employee_id=c.emp_id
+      and DATE(creation_timestamp) = CURDATE();`, (err, data) => {
       if (err) {
         e.message = "something went wrong";
         e.status = 400;
