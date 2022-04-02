@@ -1069,7 +1069,7 @@ const forgetPassword = async (req, res) => {
             });
           }
         } else {
-          return res.status(400).json({ data: false, message: 'User does not exist', status: ture });
+          return res.status(400).json({ data: false, message: 'User does not exist', status: true });
         }
       })
     }
