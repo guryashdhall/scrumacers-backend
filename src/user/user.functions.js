@@ -6,7 +6,23 @@ const jwt = require("jsonwebtoken");
 const validate_survey = require('../validation/validateSurvey');
 const validate_email = require('../validation/general')
 const util = require('../auth/util');
-// Code that could be  used in future.
+
+const sign_up = async (req, res) => {
+  try {
+    console.log("Signup functionality!")
+    const salt = bcrypt.genSaltSync(10);
+    const password = bcrypt.hashSync(req.body.password, salt);
+    return res
+      .status(200)
+      .json({ data: { requestbody: req.body, password }, message: `signup functionality`, status: true });
+  } catch (e) {
+    console.log(`Error: `, e);
+    return res
+      .status(400)
+      .json({ data: false, message: `fail`, status: false });
+  }
+};
+
 const create_employee = async (req, res) => {  
   try {
     if([1,2,3].indexOf(req.employee[0].emp_type)!==-1){
@@ -1180,7 +1196,7 @@ const fetchSurveyListManager = async (req, res) => {
   }
 }
 
-module.exports = { login, create_employee, delete_employee, fetch_all_employees, profile, leavesGet, leavesRequest, leavesRaised, 
+module.exports = { sign_up, login, create_employee, delete_employee, fetch_all_employees, profile, leavesGet, leavesRequest, leavesRaised, 
   leavesRequestsReceived, leavesApproveReject, dailystandupform,
   fetchStandupForm, fetchStandupFormManager, fetchEmployeeBadges, fetchBadgeForEmployee,
   fetchAnnouncements, postAnnouncement, deleteAnnouncement, updateEmployeeBadge, fetchNotifications,
