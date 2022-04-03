@@ -25,5 +25,8 @@ utilities.sendSuccessResponse=function(res,data,message){
     return res.status(200).json({ data, message: message, status: true });
 }
 
+utilities.sendSuccessJSONResponse=function(res,data){
+    return res.status(200).json(data);
+}
 
 module.exports=utilities;

@@ -436,9 +436,8 @@ const changePassword = async (req, res) => {
                 }
             })
         } else {
-            return res.status(200).json({ data: false, message: "The entered old password is incorrect", status: false })
+            return res.status(400).json({ data: false, message: "The entered old password is incorrect", status: false })
         }
-        return res.status(200).json(result);
     } catch (e) {
         return res
             .status(400)
