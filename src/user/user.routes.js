@@ -32,5 +32,6 @@ router.get('/fetch-survey-employee',authentication.isAuthenticated, functions.fe
 router.post('/fetch-survey-manager',authentication.isAuthenticated, functions.fetchSurveyManager);
 router.get('/fetch-survey-list-manager',authentication.isAuthenticated, functions.fetchSurveyListManager);
 router.get('/fetch-employee-hours', authentication.isAuthenticated, functions.fetchEmployeeHours);
+router.put('/change-password',authentication.isAuthenticated, functions.changePassword);
 
 module.exports = router;
