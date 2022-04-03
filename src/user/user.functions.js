@@ -967,7 +967,8 @@ const deleteAnnouncement = async (req, res) => {
 const fetchNotifications = async (req, res) => {
   let e = new Error();
   try {
-    await connection.query(`select * from notification where notification_receiver=${req.employee[0].emp_id} 
+    await connection.query(`select * from notification where notification_receiver= ${req.employee[0].emp_id} 
+    and date(notification_sent_timestamp)=current_date() 
       order by notification_sent_timestamp desc;`,
       (err, data) => {
         if (err) {
