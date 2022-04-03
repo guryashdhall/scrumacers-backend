@@ -25,7 +25,8 @@ const sign_up = async (req, res) => {
 
 const create_employee = async (req, res) => {  
   try {
-    if([1,2,3].indexOf(req.employee[0].emp_type)!==-1){
+    let condition=(req.body.first_name!=="" && req.body.last_name!=="" && req.body.email_id!=="" && req.body.password!=="" && req.body.emp_type!=="" && req.body.team_id!=="");
+    if([1,2,3].indexOf(req.employee[0].emp_type)!==-1 && condition && Object.keys(req.body).length!==0){
       const salt = bcrypt.genSaltSync(10);
       const password = bcrypt.hashSync(req.body.password, salt);
       let query=`insert into employee values(null,"${req.body.first_name}","${req.body.last_name}","${req.body.email_id}","${password}","","${req.body.emp_type}",10,sysdate(),"${req.body.team_id}");`
@@ -52,6 +53,12 @@ const create_employee = async (req, res) => {
          }
             
       })
+    }
+    else if(!condition || Object.keys(req.body).length===0){
+      let e=new Error();
+      e.message = "Invalid data";
+      e.status = 400;
+      throw e;
     }
     else{
       let e=new Error();
