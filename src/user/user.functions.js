@@ -25,8 +25,8 @@ const sign_up = async (req, res) => {
 
 const create_employee = async (req, res) => {
   try {
-    let condition=(req.body.first_name!=="" && req.body.last_name!=="" && req.body.email_id!=="" && req.body.password!=="" && req.body.emp_type!=="" && req.body.team_id!=="");
-    if([1,2,3].indexOf(req.employee[0].emp_type)!==-1 && condition && Object.keys(req.body).length!==0){
+    let condition = (req.body.first_name !== "" && req.body.last_name !== "" && req.body.email_id !== "" && req.body.password !== "" && req.body.emp_type !== "" && req.body.team_id !== "");
+    if ([1, 2, 3].indexOf(req.employee[0].emp_type) !== -1 && condition && Object.keys(req.body).length !== 0) {
       const salt = bcrypt.genSaltSync(10);
       const password = bcrypt.hashSync(req.body.password, salt);
       let query = `insert into employee values(null,"${req.body.first_name}","${req.body.last_name}","${req.body.email_id}","${password}","","${req.body.emp_type}",10,sysdate(),"${req.body.team_id}");`
@@ -54,14 +54,14 @@ const create_employee = async (req, res) => {
 
         })
     }
-    else if(!condition || Object.keys(req.body).length===0){
-      let e=new Error();
+    else if (!condition || Object.keys(req.body).length === 0) {
+      let e = new Error();
       e.message = "Invalid data";
       e.status = 400;
       throw e;
     }
-    else{
-      let e=new Error();
+    else {
+      let e = new Error();
       e.message = "You are not authorized to create employee!";
       e.status = 400;
       throw e;
@@ -103,8 +103,8 @@ const fetch_all_employees = async (req, res) => {
           }
         })
     }
-    else{
-      let e=new Error();
+    else {
+      let e = new Error();
       e.message = "You are not authorized to access employee records";
       e.status = 400;
       throw e;
@@ -1256,9 +1256,9 @@ const fetchEmployeeHours = async (req, res) => {
         e.status = 400;
         throw e;
       } else if (data.length) {
-        var result=[]
-        data.forEach(obj=>{
-          if(result.length){
+        var result = []
+        data.forEach(obj => {
+          if (result.length) {
             var exist_or_not = 0;
             var index;
             result.forEach((element, i) => {
@@ -1267,41 +1267,70 @@ const fetchEmployeeHours = async (req, res) => {
                 index = i
               }
             })
-            if(exist_or_not){
+            if (exist_or_not) {
               result[index].employee_track.push({
                 emp_id: obj.emp_id,
                 first_name: obj.first_name,
-                last_name:obj.last_name,
+                last_name: obj.last_name,
                 duration: obj.duration
               })
             } else {
               result.push({
                 date: obj.working_date,
-                employee_track:[{
+                employee_track: [{
                   emp_id: obj.emp_id,
                   first_name: obj.first_name,
-                  last_name:obj.last_name,
+                  last_name: obj.last_name,
                   duration: obj.duration
-                }] 
+                }]
               })
             }
           } else {
             result.push({
               date: obj.working_date,
-              employee_track:[{
+              employee_track: [{
                 emp_id: obj.emp_id,
                 first_name: obj.first_name,
-                last_name:obj.last_name,
+                last_name: obj.last_name,
                 duration: obj.duration
-              }] 
+              }]
             })
           }
         })
-        return res.status(200).json({data:result,message:"Hours tracking fetched",status: true});
+        return res.status(200).json({ data: result, message: "Hours tracking fetched", status: true });
       } else {
         return res.status(200).json({ data: [], message: "No Employee's Tracking Hour Found In Last 3 Weeks", status: true })
       }
     })
+  } catch (e) {
+    return res
+      .status(400)
+      .json({ data: false, message: `Something went wrong`, status: false });
+  }
+}
+
+const changePassword = async (req, res) => {
+  let e=new Error();  
+  try {
+    const result = await bcrypt.compare(req.body.old_password, req.employee[0].password);
+    if (result) {
+      const salt = bcrypt.genSaltSync(10);
+      const password = bcrypt.hashSync(req.body.new_password, salt);
+      await connection.query(`update employee set password="${password}" where emp_id=${req.employee[0].emp_id}`, (err, data) => {
+        if (err) {
+          e.message = "Something went wrong";
+          e.status = 400;
+          throw e;
+        } else if (data.affectedRows) {
+          return res.status(200).json({ data: true, message: "Password updated", status: true })
+        } else {
+          return res.status(400).json({ data: false, message: "something went wrong", status: false })
+        }
+      })
+    } else {
+      return res.status(200).json({ data: false, message: "The entered old password is incorrect", status: false })
+    }
+    return res.status(200).json(result);
   } catch (e) {
     return res
       .status(400)
@@ -1315,5 +1344,5 @@ module.exports = {
   fetchStandupForm, fetchStandupFormManager, fetchEmployeeBadges, fetchBadgeForEmployee,
   fetchAnnouncements, postAnnouncement, deleteAnnouncement, updateEmployeeBadge, fetchNotifications,
   surveyform, forgetPassword, fillsurveyform, fetchSurveyEmployee, fetchSurveyManager, fetchSurveyListManager,
-  logout, fetchEmployeeHours
+  logout, fetchEmployeeHours, changePassword
 }
