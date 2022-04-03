@@ -46,5 +46,54 @@ describe("Testing of Signup Module", () => {
                     done();
                 })
         })
+
+        it("Testing for create employee by unauthorized user", (done) => {
+            chai.request(app).post('/api/user/create-employee').set('Authorization',`Bearer ${process.env.EMPLOYEE_TEST_TOKEN}`)
+    .send(data)
+        .end((err, res) => {
+            res.should.have.status(400);
+            res.body.should.have.property("message").eqls("You are not authorized to create employee!");
+            done();
+        })
+    })
+
+    it("Testing for create employee if fields are missing", (done) => {
+        data={}
+        chai.request(app).post('/api/user/create-employee').set('Authorization',`Bearer ${process.env.HR_TEST_TOKEN}`)
+.send(data)
+    .end((err, res) => {
+        res.should.have.status(400);
+        res.body.should.have.property("message").eqls("Invalid data");
+        done();
+    })
+})
+
+it("Testing of delete employees functionality", (done) => {
+    data={
+        emp_id: 11
+        }
+    chai.request(app).put('/api/user/delete_employee').set('Authorization',`Bearer ${process.env.HR_TEST_TOKEN}`)
+.send(data)
+.end((err, res) => {
+    res.should.have.status(400);
+    res.body.should.have.property("message").eqls("Employee doesn't exist!");
+    done();
+})
+
+})
+
+it("Testing for delete  employee by unauthorized user", (done) => {
+    data={
+        emp_id: 11
+        }
+    chai.request(app).put('/api/user/delete_employee').set('Authorization',`Bearer ${process.env.EMPLOYEE_TEST_TOKEN}`)
+.send(data)
+.end((err, res) => {
+    res.should.have.status(400);
+    res.body.should.have.property("message").eqls("You are not authorized to delete employees");
+    done();
+})
+})
+
 })
 })
