@@ -1,10 +1,8 @@
-/* eslint-disable no-undef */
 const jwt = require("jsonwebtoken");
 require('dotenv').config();
 
 const isAuthenticated = (req, res, next) => {
   let token = req.get("Authorization");
-  console.log("hi"+token)
   try {
     if (token) {
       // Remove Bearer from string

@@ -1,7 +1,15 @@
 const express = require('express');
 var cors = require("cors");
-const { createDBConnection } = require("./database_connection")
+const { createDBConnection } = require("./database_connection");
 const userroutes = require("./src/user/user.routes");
+const userRoutes = require("./src/routes/userRoutes");
+const surveyRoutes = require("./src/routes/surveyRoutes");
+const scrumFormRoutes = require("./src/routes/scrumFormRoutes");
+const notificationRoutes = require("./src/routes/notificationRoutes");
+const leaveRoutes = require("./src/routes/leaveRoutes");
+const badgeRoutes = require("./src/routes/badgeRoutes");
+const announcementRoutes = require("./src/routes/announcementRoutes");
+
 require('dotenv').config();
 var app = express();
 
@@ -40,8 +48,17 @@ if (process.env.NODE_ENV === 'testing') {
   }
 }
 
+// // Routes
+// app.use("/api/user", userroutes);
+
 // Routes
-app.use("/api/user", userroutes);
+app.use("/api/user", userRoutes);
+app.use("/api/user", surveyRoutes);
+app.use("/api/user", scrumFormRoutes);
+app.use("/api/user", notificationRoutes);
+app.use("/api/user", leaveRoutes);
+app.use("/api/user", badgeRoutes);
+app.use("/api/user", announcementRoutes);
 
 app.get('/', function (req, res) {
   res.send('Hello World!');
@@ -56,8 +73,8 @@ createDBConnection(db_credentials).then(() => {
   app.listen(port, function () {
     console.log('Scrum Acers Backend app listening on port ' + port);
   });
-}).catch((err)=>{
-  console.log("Error occured while creating DB connection "+err.message)
+}).catch((err) => {
+  console.log("Error occured while creating DB connection " + err.message)
 })
 
 module.exports = app;
