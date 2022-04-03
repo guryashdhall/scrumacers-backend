@@ -8,6 +8,7 @@ router.post("/create-employee", authentication.isAuthenticated, functions.create
 router.get("/fetch_all_employees", authentication.isAuthenticated, functions.fetch_all_employees);
 router.put("/delete_employee", authentication.isAuthenticated, functions.delete_employee);
 router.post("/login", functions.login);
+router.put("/logout", authentication.isAuthenticated, functions.logout);
 router.get("/profile", authentication.isAuthenticated, functions.profile);
 router.post("/dailyStandUpForm", authentication.isAuthenticated, functions.dailystandupform);
 router.get("/fetchStandupForm", authentication.isAuthenticated, functions.fetchStandupForm);
@@ -30,5 +31,6 @@ router.post('/fill-survey',authentication.isAuthenticated, functions.fillsurveyf
 router.get('/fetch-survey-employee',authentication.isAuthenticated, functions.fetchSurveyEmployee);
 router.post('/fetch-survey-manager',authentication.isAuthenticated, functions.fetchSurveyManager);
 router.get('/fetch-survey-list-manager',authentication.isAuthenticated, functions.fetchSurveyListManager);
+router.get('/fetch-employee-hours', authentication.isAuthenticated, functions.fetchEmployeeHours);
 
 module.exports = router;
