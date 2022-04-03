@@ -95,5 +95,28 @@ it("Testing for delete  employee by unauthorized user", (done) => {
 })
 })
 
+it("Testing for fetch all employees functionality", (done) => {
+    chai.request(app).get('/api/user/fetch_all_employees').set('Authorization',`Bearer ${process.env.HR_TEST_TOKEN}`)
+.send(data)
+.end((err, res) => {
+    res.should.have.status(200);
+    res.body.should.have.property("message").eqls("Employees fetched successfully");
+    done();
+})
+})
+
+it("Testing for fetching employee info by unauthorized user", (done) => {
+    data={
+        emp_id: 11
+        }
+    chai.request(app).get('/api/user/fetch_all_employees').set('Authorization',`Bearer ${process.env.EMPLOYEE_TEST_TOKEN}`)
+.send(data)
+.end((err, res) => {
+    res.should.have.status(400);
+    res.body.should.have.property("message").eqls("You are not authorized to access employee records");
+    done();
+})
+})
+
 })
 })

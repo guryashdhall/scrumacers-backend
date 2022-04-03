@@ -105,7 +105,7 @@ const fetch_all_employees = async (req, res) => {
     }
     else{
       let e=new Error();
-      e.message = "You are not authorized to create employee!";
+      e.message = "You are not authorized to access employee records";
       e.status = 400;
       throw e;
     }    
