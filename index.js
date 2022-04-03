@@ -1,7 +1,6 @@
 const express = require('express');
 var cors = require("cors");
 const { createDBConnection } = require("./database_connection");
-const userroutes = require("./src/user/user.routes");
 const userRoutes = require("./src/routes/userRoutes");
 const surveyRoutes = require("./src/routes/surveyRoutes");
 const scrumFormRoutes = require("./src/routes/scrumFormRoutes");
@@ -47,9 +46,6 @@ if (process.env.NODE_ENV === 'testing') {
     multipleStatements: true
   }
 }
-
-// // Routes
-// app.use("/api/user", userroutes);
 
 // Routes
 app.use("/api/user", userRoutes);
