@@ -3,73 +3,74 @@ const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const validate_email = require('../validation/general')
 const helper = require('../utils/helper');
+const utilities = require('../utils/utilities');
 
 // Login functionality for all users
 const login = async (req, res) => {
     try {
         validate_login.validateLogin(req.body);
         await connection.query(`select * FROM employee where email='${req.body.email}';`, async (err, data) => {
-            if (err) {
-                return res.status(400).json({
-                    data: false,
-                    message: err,
-                    status: false
-                })
-            }
-            if (data.length) {
-                const passwordCompare = bcrypt.compareSync(req.body.password, data[0].password);
-                if (passwordCompare) {
-                    let auth_token = "";
-                    auth_token = jwt.sign({ result: { emp_id: data[0].emp_id } }, "afgps7", {
-                        expiresIn: "10h",
-                    });
-                    await connection.query(`start transaction;`);
-                    await connection.query(`update employee set authentication_token='${auth_token}' where emp_id='${data[0].emp_id}';`,
-                        async (err, data1) => {
-                            if (err) {
-                                return res.status(400).json({
-                                    data: false,
-                                    message: err,
-                                    status: false
-                                })
-                            };
-                            if (data1.affectedRows) {
-                                const previous_day = await connection.query(`select * from hours_tracking where emp_id=${data[0].emp_id} and working_date=DATE_SUB(current_date(), INTERVAL 1 DAY);`)
-                                if (previous_day.length && previous_day[0].status === "Checked In") {
-                                    await connection.query(`update hours_tracking set duration=360 and status="Checked Out" where emp_id=${data[0].emp_id} and working_date=DATE_SUB(current_date(), INTERVAL 1 DAY);`)
-                                }
-                                const today = await connection.query(`select * from hours_tracking where emp_id=${data[0].emp_id} and working_date=CURRENT_DATE();`)
-                                if (today.length) {
-                                    await connection.query(`update hours_tracking set status="Checked In" where emp_id=${data[0].emp_id} and working_date=CURRENT_DATE();`)
-                                } else {
-                                    await connection.query(`insert into hours_tracking (emp_id, status) values (${data[0].emp_id},"Checked In")`)
-                                }
-                                await connection.query("commit;");
-                                return res.status(200).json({
-                                    data,
-                                    message: "login successfully",
-                                    token: auth_token,
-                                    status: true,
-                                    usertype: data[0].emp_type
-                                });
-                            }
-                            return res.status(400).json({
-                                data: false,
-                                message: "Data not updated in DB",
-                                status: true,
-                            });
-                        });
+            try{
+                if (err) {
+                    return utilities.sendErrorResponse(res, "Some error occured", 400);
                 }
-                return res.status(400).json({
-                    data: false,
-                    message: "Invalid password",
-                    status: false
-                })
+                else{
+                    if (data.length) {
+                        const passwordCompare = bcrypt.compareSync(req.body.password, data[0].password);
+                        if (passwordCompare) {
+                            let auth_token = "";
+                            auth_token = jwt.sign({ result: { emp_id: data[0].emp_id } }, "afgps7", {
+                                expiresIn: "10h",
+                            });
+                            await connection.query(`start transaction;`);
+                            await connection.query(`update employee set authentication_token='${auth_token}' where emp_id='${data[0].emp_id}';`,
+                                async (err, data1) => {
+                                    if (err) {
+                                        return utilities.sendErrorResponse(res, "Some error occured", 400);
+                                    }
+                                    else{
+                                        if (data1.affectedRows) {
+                                            const previous_day = await connection.query(`select * from hours_tracking where emp_id=${data[0].emp_id} and working_date=DATE_SUB(current_date(), INTERVAL 1 DAY);`)
+                                            if (previous_day.length && previous_day[0].status === "Checked In") {
+                                                await connection.query(`update hours_tracking set duration=360 and status="Checked Out" where emp_id=${data[0].emp_id} and working_date=DATE_SUB(current_date(), INTERVAL 1 DAY);`)
+                                            }
+                                            const today = await connection.query(`select * from hours_tracking where emp_id=${data[0].emp_id} and working_date=CURRENT_DATE();`)
+                                            if (today.length) {
+                                                await connection.query(`update hours_tracking set status="Checked In" where emp_id=${data[0].emp_id} and working_date=CURRENT_DATE();`)
+                                            } else {
+                                                await connection.query(`insert into hours_tracking (emp_id, status) values (${data[0].emp_id},"Checked In")`)
+                                            }
+                                            await connection.query("commit;");
+                                            return res.status(200).json({
+                                                data,
+                                                message: "login successfully",
+                                                token: auth_token,
+                                                status: true,
+                                                usertype: data[0].emp_type
+                                            });
+                                        }
+                                        else{
+                                            return utilities.sendErrorResponse(res, "Data not updated in DB", 400);
+                                        }
+                                    }                                
+                                });
+                        }
+                        else{
+                            return utilities.sendErrorResponse(res, "Invalid password", 400);
+                        }                        
+                    }
+                    else{
+                        return utilities.sendErrorResponse(res, "Employee not found", 400);
+                    }
+                    
+                }
+            } catch(e) {
+                return utilities.sendErrorResponse(res, "Something went wrong", 400);
             }
-            return res.status(400).json({ message: "Employee not found", status: false, data: false });
+                        
         });
     } catch (e) {
-        return res.status(400).json({ data: false, message: 'fail', status: false });
+        return utilities.sendErrorResponse(res, "Request failed", 400);
     }
 };
 
@@ -79,19 +80,24 @@ const logout = async (req, res) => {
         await connection.query(`update hours_tracking set 
       duration=duration+${req.body.duration}, status="Checked Out" 
       where emp_id=${req.employee[0].emp_id} and working_date = current_date()`, (err, data) => {
+          try{
             if (err) {
-                let error = new Error("Error fetching employee profile");
-                error.status = 400;
-                throw error;
-            } else if (data.affectedRows) {
-                return res.status(200).json({ data: true, message: "Logout successful", status: true })
-            } else {
-                return res.status(400).json({ data: false, message: "something went wrong", status: false })
+                utilities.throwError("Error fetching employee profile", 400);
             }
+            else{
+                if (data.affectedRows) {
+                    return utilities.sendSuccessResponse(res, data, "Logout successful");
+                } else {
+                    return utilities.sendErrorResponse(res, "Something went wrong", 400);
+                }
+            }    
+          } catch(e) {
+            return utilities.sendErrorResponse(res, "Something went wrong", 400);
+          }
         })
     }
     catch (e) {
-        return res.status(400).json({ data: false, message: "fail", status: false })
+        return utilities.sendErrorResponse(res, "Request failed", 400);
     }
 }
 
@@ -107,42 +113,29 @@ const create_employee = async (req, res) => {
                 (err, data) => {
                     try {
                         if (err) {
-                            let e = new Error();
-                            e.message = "Something went wrong";
-                            e.status = 400;
-                            throw e;
+                            utilities.throwError("Something went wrong", 400);
                         }
                         else {
                             if (data.affectedRows) {
-                                return res.status(200).json({ data: true, message: `Employee created successfully`, status: true });
+                                return utilities.sendSuccessResponse(res, data, `Employee created successfully`);
                             } else {
-                                return res.status(400).json({ data: false, message: `Couldn't create employee. Try again later!`, status: false });
+                                return utilities.sendErrorResponse(res, "Couldn't create employee. Try again later!", 400);
                             }
                         }
                     } catch (e) {
-                        return res
-                            .status(400)
-                            .json({ data: false, message: e.message, status: false });
+                        return utilities.sendErrorResponse(res, e.message, 400);
                     }
 
                 })
         }
         else if (!condition || Object.keys(req.body).length === 0) {
-            let e = new Error();
-            e.message = "Invalid data";
-            e.status = 400;
-            throw e;
+            utilities.throwError("Invalid data", 400);
         }
         else {
-            let e = new Error();
-            e.message = "You are not authorized to create employee!";
-            e.status = 400;
-            throw e;
+            utilities.throwError("You are not authorized to create employee!", 400);
         }
     } catch (e) {
-        return res
-            .status(400)
-            .json({ data: false, message: e.message, status: false });
+        return utilities.sendErrorResponse(res, e.message, 400);
     }
 };
 
@@ -157,36 +150,26 @@ const fetch_all_employees = async (req, res) => {
                 (err, data) => {
                     try {
                         if (err) {
-                            let e = new Error();
-                            e.message = "Something went wrong";
-                            e.status = 400;
-                            throw e;
+                            utilities.throwError("Something went wrong", 400);
                         }
                         else {
                             if (data.length) {
-                                return res.status(200).json({ data, message: `Employees fetched successfully`, status: true });
+                                return utilities.sendSuccessResponse(res, data, `Employees fetched successfully`);
                             }
                             else {
-                                return res.status(400).json({ data: false, message: `Couldn't fetch employees!`, status: false });
+                                return utilities.sendErrorResponse(res, "Couldn't fetch employees!", 400);
                             }
                         }
                     } catch (e) {
-                        return res
-                            .status(400)
-                            .json({ data: false, message: e.message, status: false });
+                        return utilities.sendErrorResponse(res, "Request failed", 400);
                     }
                 })
         }
         else {
-            let e = new Error();
-            e.message = "You are not authorized to access employee records";
-            e.status = 400;
-            throw e;
+            utilities.throwError("You are not authorized to access employee records", 400);
         }
     } catch (e) {
-        return res
-            .status(400)
-            .json({ data: false, message: e.message, status: false });
+        return utilities.sendErrorResponse(res, e.message, 400);
     }
 };
 
@@ -199,38 +182,27 @@ const delete_employee = async (req, res) => {
                 (err, data) => {
                     try {
                         if (err) {
-                            console.log(err.message)
-                            let e = new Error();
-                            e.message = "Something went wrong";
-                            e.status = 400;
-                            throw e;
+                            utilities.throwError("Something went wrong", 400);
                         }
                         else {
                             if (data[1].affectedRows) {
-                                return res.status(200).json({ data, message: `Employee deleted successfully`, status: true });
+                                return utilities.sendSuccessResponse(res, data, `Employee deleted successfully`);
                             }
                             else {
-                                return res.status(400).json({ data: false, message: `Employee doesn't exist!`, status: false });
+                                return utilities.sendErrorResponse(res, "Employee doesn't exist!", 400);
                             }
                         }
                     } catch (e) {
-                        return res
-                            .status(400)
-                            .json({ data: false, message: e.message, status: false });
+                        return utilities.sendErrorResponse(res, e.message, 400);
                     }
 
                 })
         }
         else {
-            let e = new Error();
-            e.message = "You are not authorized to delete employees";
-            e.status = 400;
-            throw e;
+            utilities.throwError("You are not authorized to delete employees", 400);
         }
     } catch (e) {
-        return res
-            .status(400)
-            .json({ data: false, message: e.message, status: false });
+        return utilities.sendErrorResponse(res, e.message, 400);
     }
 };
 
@@ -246,203 +218,193 @@ const profile = async (req, res) => {
       left join badge as b
       on eb.badge_id=b.id
       where e.emp_id=${req.employee[0].emp_id}`, (err, data) => {
-            if (err) {
-                let error = new Error("Error fetching employee profile");
-                error.status = 400;
-                throw error;
-            }
-            if (data.length) {
-                var result = [];
-                data.forEach(obj => {
-                    if (result[0]) {
-                        var exist_or_not = 0;
-                        var index;
-                        result.forEach((element, i) => {
-                            if (element.emp_id == obj.emp_id) {
-                                exist_or_not = 1;
-                                index = i
+            try{
+                if (err) {
+                    utilities.throwError("Error fetching employee profile", 400);
+                }
+                else{
+                    if (data.length) {
+                        var result = [];
+                        data.forEach(obj => {
+                            if (result[0]) {
+                                var exist_or_not = 0;
+                                var index;
+                                result.forEach((element, i) => {
+                                    if (element.emp_id == obj.emp_id) {
+                                        exist_or_not = 1;
+                                        index = i
+                                    }
+                                })
+                                if (exist_or_not == 0) {
+                                    if (obj.id != null) {
+                                        result.push({
+                                            "emp_id": obj.emp_id,
+                                            "first_name": obj.first_name,
+                                            "last_name": obj.last_name,
+                                            "email": obj.email,
+                                            "password": obj.password,
+                                            "team_id": obj.team_id,
+                                            "team_name": obj.team_name,
+                                            "team_description": obj.team_description,
+                                            "team_leader": obj.team_leader,
+                                            "number_of_leaves_left": obj.num_of_leaves,
+                                            "emp_type": obj.emp_type,
+                                            "emp_position": obj.type_name,
+                                            "badge_earned": [{
+                                                "badge_id": obj.id,
+                                                "badge_name": obj.name,
+                                                "badge_description": obj.description,
+                                                "received_at": obj.receieved_at
+                                            }]
+                                        })
+                                    } else {
+                                        result.push({
+                                            "emp_id": obj.emp_id,
+                                            "first_name": obj.first_name,
+                                            "last_name": obj.last_name,
+                                            "email": obj.email,
+                                            "password": obj.password,
+                                            "team_id": obj.team_id,
+                                            "team_name": obj.team_name,
+                                            "team_description": obj.team_description,
+                                            "team_leader": obj.team_leader,
+                                            "number_of_leaves_left": obj.num_of_leaves,
+                                            "emp_type": obj.emp_type,
+                                            "emp_position": obj.type_name,
+                                            "badge_earned": [],
+                                        })
+                                    }
+                                } else {
+                                    if (obj.id != null) {
+                                        result[index]["badge_earned"].push({
+                                            "badge_id": obj.id,
+                                            "badge_name": obj.name,
+                                            "badge_description": obj.description,
+                                            "received_at": obj.receieved_at
+                                        })
+                                    }
+                                }
+                            } else {
+                                if (obj.id != null) {
+                                    result.push({
+                                        "emp_id": obj.emp_id,
+                                        "first_name": obj.first_name,
+                                        "last_name": obj.last_name,
+                                        "email": obj.email,
+                                        "password": obj.password,
+                                        "team_id": obj.team_id,
+                                        "team_name": obj.team_name,
+                                        "team_description": obj.team_description,
+                                        "team_leader": obj.team_leader,
+                                        "number_of_leaves_left": obj.num_of_leaves,
+                                        "emp_type": obj.emp_type,
+                                        "emp_position": obj.type_name,
+                                        "badge_earned": [{
+                                            "badge_id": obj.id,
+                                            "badge_name": obj.name,
+                                            "badge_description": obj.description,
+                                            "received_at": obj.receieved_at
+                                        }],
+                                    })
+                                } else {
+                                    result.push({
+                                        "emp_id": obj.emp_id,
+                                        "first_name": obj.first_name,
+                                        "last_name": obj.last_name,
+                                        "email": obj.email,
+                                        "password": obj.password,
+                                        "team_id": obj.team_id,
+                                        "team_name": obj.team_name,
+                                        "team_description": obj.team_description,
+                                        "team_leader": obj.team_leader,
+                                        "number_of_leaves_left": obj.num_of_leaves,
+                                        "emp_type": obj.emp_type,
+                                        "emp_position": obj.type_name,
+                                        "badge_earned": [],
+                                    })
+                                }
                             }
                         })
-                        if (exist_or_not == 0) {
-                            if (obj.id != null) {
-                                result.push({
-                                    "emp_id": obj.emp_id,
-                                    "first_name": obj.first_name,
-                                    "last_name": obj.last_name,
-                                    "email": obj.email,
-                                    "password": obj.password,
-                                    "team_id": obj.team_id,
-                                    "team_name": obj.team_name,
-                                    "team_description": obj.team_description,
-                                    "team_leader": obj.team_leader,
-                                    "number_of_leaves_left": obj.num_of_leaves,
-                                    "emp_type": obj.emp_type,
-                                    "emp_position": obj.type_name,
-                                    "badge_earned": [{
-                                        "badge_id": obj.id,
-                                        "badge_name": obj.name,
-                                        "badge_description": obj.description,
-                                        "received_at": obj.receieved_at
-                                    }]
-                                })
-                            } else {
-                                result.push({
-                                    "emp_id": obj.emp_id,
-                                    "first_name": obj.first_name,
-                                    "last_name": obj.last_name,
-                                    "email": obj.email,
-                                    "password": obj.password,
-                                    "team_id": obj.team_id,
-                                    "team_name": obj.team_name,
-                                    "team_description": obj.team_description,
-                                    "team_leader": obj.team_leader,
-                                    "number_of_leaves_left": obj.num_of_leaves,
-                                    "emp_type": obj.emp_type,
-                                    "emp_position": obj.type_name,
-                                    "badge_earned": [],
-                                })
-                            }
-                        } else {
-                            if (obj.id != null) {
-                                result[index]["badge_earned"].push({
-                                    "badge_id": obj.id,
-                                    "badge_name": obj.name,
-                                    "badge_description": obj.description,
-                                    "received_at": obj.receieved_at
-                                })
-                            }
-                        }
-                    } else {
-                        if (obj.id != null) {
-                            result.push({
-                                "emp_id": obj.emp_id,
-                                "first_name": obj.first_name,
-                                "last_name": obj.last_name,
-                                "email": obj.email,
-                                "password": obj.password,
-                                "team_id": obj.team_id,
-                                "team_name": obj.team_name,
-                                "team_description": obj.team_description,
-                                "team_leader": obj.team_leader,
-                                "number_of_leaves_left": obj.num_of_leaves,
-                                "emp_type": obj.emp_type,
-                                "emp_position": obj.type_name,
-                                "badge_earned": [{
-                                    "badge_id": obj.id,
-                                    "badge_name": obj.name,
-                                    "badge_description": obj.description,
-                                    "received_at": obj.receieved_at
-                                }],
-                            })
-                        } else {
-                            result.push({
-                                "emp_id": obj.emp_id,
-                                "first_name": obj.first_name,
-                                "last_name": obj.last_name,
-                                "email": obj.email,
-                                "password": obj.password,
-                                "team_id": obj.team_id,
-                                "team_name": obj.team_name,
-                                "team_description": obj.team_description,
-                                "team_leader": obj.team_leader,
-                                "number_of_leaves_left": obj.num_of_leaves,
-                                "emp_type": obj.emp_type,
-                                "emp_position": obj.type_name,
-                                "badge_earned": [],
-                            })
-                        }
-                    }
-                })
-                return res.status(200).json({
-                    result,
-                    message: "Data fetched",
-                    status: true
-                })
-            }
+                        return utilities.sendSuccessResponse(res, result, "Data fetched");
+                    }   
+                }
+            } catch (e) {
+                return utilities.sendErrorResponse(res, e.message, 400);
+            }            
         })
     } catch (e) {
-        return res.status(400).json({ data: false, message: "fail", status: false })
+        return utilities.sendErrorResponse(res, "Request Failed", 400);
     }
 }
 
 // Function for forgot password functionality
 const forgetPassword = async (req, res) => {
-    let e = new Error();
     try {
         if (!validate_email.validateEmail(req.body.email)) {
             return res.status(400).json({ data: false, message: "Invalid email", status: false })
         } else {
             await connection.query(`select * from employee where email="${req.body.email}"`, async (err, data) => {
-                if (err) {
-                    e.message = "something went wrong";
-                    e.status = 400;
-                    throw e;
-                } else if (data.length) {
-                    await connection.query('start transaction;');
-                    const new_password = helper.passwordGenerator(10, 'aA#!');
-                    const salt = bcrypt.genSaltSync(10);
-                    const password = bcrypt.hashSync(new_password, salt);
-                    const result = await connection.query(
-                        `update employee set password = "${password}" where emp_id=${data[0].emp_id}`
-                    );
-                    if (result.affectedRows) {
-                        let send_data = {
-                            password: new_password,
-                            email: data[0]['email']
-                        };
-                        await helper.sendEmailTemporaryPassword(send_data);
-                        await connection.query('commit;');
-                        return res.status(200).json({
-                            data: true,
-                            message: `Temporary password has been sent`,
-                            status: true,
-                        });
+                try{
+                    if (err) {
+                        utilities.throwError("something went wrong", 400);
+                    } else if (data.length) {
+                        await connection.query('start transaction;');
+                        const new_password = helper.passwordGenerator(10, 'aA#!');
+                        const salt = bcrypt.genSaltSync(10);
+                        const password = bcrypt.hashSync(new_password, salt);
+                        const result = await connection.query(
+                            `update employee set password = "${password}" where emp_id=${data[0].emp_id}`
+                        );
+                        if (result.affectedRows) {
+                            let send_data = {
+                                password: new_password,
+                                email: data[0]['email']
+                            };
+                            await helper.sendEmailTemporaryPassword(send_data);
+                            await connection.query('commit;');
+                            return utilities.sendSuccessResponse(res, result, "Temporary password has been sent");
+                        } else {
+                            connection.query('rollback;')
+                            return utilities.sendErrorResponse(res, "something went wrong", 400);
+                        }
                     } else {
-                        connection.query('rollback;')
-                        return res.status(400).json({
-                            data: false,
-                            message: `something went wrong`,
-                            status: false,
-                        });
+                        return utilities.sendErrorResponse(res, "User does not exist", 400);
                     }
-                } else {
-                    return res.status(400).json({ data: false, message: 'User does not exist', status: true });
-                }
+                } catch (e) {
+                    return utilities.sendErrorResponse(res, e.message, 400);
+                }                  
             })
         }
     } catch (e) {
-        return res
-            .status(400)
-            .json({ data: false, message: `fail`, status: false });
+        return utilities.sendErrorResponse(res, "Request failed", 400);
     }
 }
 
 const changePassword = async (req, res) => {
-    let e = new Error();
     try {
         const result = await bcrypt.compare(req.body.old_password, req.employee[0].password);
         if (result) {
             const salt = bcrypt.genSaltSync(10);
             const password = bcrypt.hashSync(req.body.new_password, salt);
             await connection.query(`update employee set password="${password}" where emp_id=${req.employee[0].emp_id}`, (err, data) => {
-                if (err) {
-                    e.message = "Something went wrong";
-                    e.status = 400;
-                    throw e;
-                } else if (data.affectedRows) {
-                    return res.status(200).json({ data: true, message: "Password updated", status: true })
-                } else {
-                    return res.status(400).json({ data: false, message: "something went wrong", status: false })
-                }
+                try{
+                    if (err) {
+                        utilities.throwError("Something went wrong", 400);
+                    } else if (data.affectedRows) {
+                        return utilities.sendSuccessResponse(res, data, "Password updated");
+                    } else {
+                        return utilities.sendErrorResponse(res, "something went wrong", 400);
+                    }
+                } catch(e){
+                    return utilities.sendErrorResponse(res, e.message, 400);
+                }                
             })
         } else {
-            return res.status(200).json({ data: false, message: "The entered old password is incorrect", status: false })
+            return utilities.sendSuccessResponse(res, {data:false}, "The entered old password is incorrect");
         }
-        return res.status(200).json(result);
+        return utilities.sendSuccessJSONResponse(res,result);
     } catch (e) {
-        return res
-            .status(400)
-            .json({ data: false, message: `Something went wrong`, status: false });
+        return utilities.sendErrorResponse(res, "Request failed", 400);
     }
 }
 
@@ -455,6 +417,7 @@ const fetchEmployeeHours = async (req, res) => {
       (select employee.emp_id from employee where team_id=${req.employee[0].team_id} and employee.emp_id!=${req.employee[0].emp_id})
       and working_date>DATE_SUB(current_date(), INTERVAL 21 DAY)
       order by working_date desc;`, (err, data) => {
+          try{
             if (err) {
                 e.message = "Something went wrong";
                 e.status = 400;
@@ -501,15 +464,16 @@ const fetchEmployeeHours = async (req, res) => {
                         })
                     }
                 })
-                return res.status(200).json({ data: result, message: "Hours tracking fetched", status: true });
+                return utilities.sendSuccessResponse(res,result,"Hours tracking fetched")
             } else {
-                return res.status(200).json({ data: [], message: "No Employee's Tracking Hour Found In Last 3 Weeks", status: true })
+                return utilities.sendSuccessJSONResponse(data,{ data: [], message: "No Employee's Tracking Hour Found In Last 3 Weeks", status: true })
             }
+          } catch(e) {
+            return utilities.sendErrorResponse(res, e.message, 400);
+          }            
         })
     } catch (e) {
-        return res
-            .status(400)
-            .json({ data: false, message: `Something went wrong`, status: false });
+        return utilities.sendErrorResponse(res, "Request failed", 400);
     }
 }
 
