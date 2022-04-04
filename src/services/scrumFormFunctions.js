@@ -19,7 +19,7 @@ const createStandUpForm = async (req, res) => {
                     if (req.body.blocker > 0 && receiver.length) {
                         let insertnotification = `insert into notification (notification_description, notification_sender, notification_receiver)
             values ("${req.employee[0].first_name} ${req.employee[0].last_name} has faced ${req.body.blocker} blockage", ${req.employee[0].emp_id},${receiver[0].emp_id})`
-                        for (i = 1; i < receiver.length; i++) {
+                        for (let i = 1; i < receiver.length; i++) {
                             insertnotification += `,("${req.employee[0].first_name} ${req.employee[0].last_name} has faced ${req.body.blocker} blockage", ${req.employee[0].emp_id},${receiver[i].emp_id})`
                         }
                         insertnotification += `;`

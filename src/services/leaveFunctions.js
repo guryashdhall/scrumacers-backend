@@ -5,7 +5,7 @@ const leavesGet = async (req, res) => {
     await connection.query(
       `select emp_id as team_leader_emp_id, first_name,last_name,email from employee where emp_id=(select team_leader from employee a,team b where emp_id=${req.employee[0].emp_id} and a.team_id=b.team_id);`,
       (err, data) => {
-        return leavesCommon(1,res,err,data,"Error fetching employee's leader","Data fetched","No team leader information found","Some error occured");
+        return leavesCommon(1,res,err,data,"Error fetching employee's leader","Data fetched","No team leader information found");
       }
     );
   } catch (e) {
@@ -13,7 +13,7 @@ const leavesGet = async (req, res) => {
   }
 };
 
-const leavesCommon=function(temp,res,err,data,errMsg,success,err2Msg,catchmsg){
+const leavesCommon=function(temp,res,err,data,errMsg,success,err2Msg){
   try {
     if (err) {
       utilities.throwError(errMsg, 400);
@@ -25,7 +25,7 @@ const leavesCommon=function(temp,res,err,data,errMsg,success,err2Msg,catchmsg){
       }
     }
   } catch (e) {
-    return utilities.sendErrorResponse(res, catchmsg, 400);
+    return utilities.sendErrorResponse(res, "Some error occured", 400);
   }
 }
 
@@ -152,21 +152,7 @@ const leavesRequest = async (req, res) => {
     await connection.query(
       `insert into leave_information values(null,${req.body.emp_id},${req.body.manager_id},'${req.body.leaveDesc}','${req.body.start_date}','${req.body.end_date}',DEFAULT,DEFAULT);`,
       (err, data) => {
-        return leavesCommon(2,res,err,data,"Failed to raise leave request", data.affectedRows + " rows inserted","Failed to raise leave request","Some error occured");
-          // try{
-          //   if (err) {
-          //       utilities.throwError("Failed to raise leave request", 400);
-          //   }
-          //   else{
-          //       if (data.affectedRows) {
-          //           return utilities.sendSuccessResponse(res, data, data.affectedRows + " rows inserted");          
-          //       } else {
-          //           return utilities.sendErrorResponse(res, "Failed to raise leave request", 400);
-          //       }
-          //   } 
-          // } catch(e){
-          //   return utilities.sendErrorResponse(res, "Some error occured", 400);
-          // }            
+        return leavesCommon(2,res,err,data,"Failed to raise leave request", data.affectedRows + " rows inserted","Failed to raise leave request");        
       }
     );
   } catch (e) {
