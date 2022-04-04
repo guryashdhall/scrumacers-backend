@@ -11,8 +11,6 @@ backend-build:
   image: ruby:latest
   only:
     - development
-  tags: 
-    - dalfcs_docker_kvm
   script:
     - apt-get update -qy
     - apt-get install -y ruby-dev
@@ -23,8 +21,6 @@ backend-test:
   stage: backend-test
   only:
     - development
-  tags: 
-    - dalfcs_docker_kvm
   script: 
     - npm install
     - npm test
