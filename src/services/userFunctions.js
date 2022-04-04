@@ -10,11 +10,11 @@ const login = async (req, res) => {
     try {
         validate_login.validateLogin(req.body);
         await connection.query(`select * FROM employee where email='${req.body.email}';`, async (err, data) => {
-            try{
+            try {
                 if (err) {
                     return utilities.sendErrorResponse(res, "Some error occured", 400);
                 }
-                else{
+                else {
                     if (data.length) {
                         const passwordCompare = bcrypt.compareSync(req.body.password, data[0].password);
                         if (passwordCompare) {
@@ -28,7 +28,7 @@ const login = async (req, res) => {
                                     if (err2) {
                                         return utilities.sendErrorResponse(res, "Some error occured", 400);
                                     }
-                                    else{
+                                    else {
                                         if (data1.affectedRows) {
                                             const previous_day = await connection.query(`select * from hours_tracking where emp_id=${data[0].emp_id} and working_date=DATE_SUB(current_date(), INTERVAL 1 DAY);`)
                                             if (previous_day.length && previous_day[0].status === "Checked In") {
@@ -49,25 +49,25 @@ const login = async (req, res) => {
                                                 usertype: data[0].emp_type
                                             });
                                         }
-                                        else{
+                                        else {
                                             return utilities.sendErrorResponse(res, "Data not updated in DB", 400);
                                         }
-                                    }                                
+                                    }
                                 });
                         }
-                        else{
+                        else {
                             return utilities.sendErrorResponse(res, "Invalid password", 400);
-                        }                        
+                        }
                     }
-                    else{
+                    else {
                         return utilities.sendErrorResponse(res, "Employee not found", 400);
                     }
-                    
+
                 }
-            } catch(e) {
+            } catch (e) {
                 return utilities.sendErrorResponse(res, "Something went wrong", 400);
             }
-                        
+
         });
     } catch (e) {
         return utilities.sendErrorResponse(res, "Request failed", 400);
@@ -80,20 +80,20 @@ const logout = async (req, res) => {
         await connection.query(`update hours_tracking set 
       duration=duration+${req.body.duration}, status="Checked Out" 
       where emp_id=${req.employee[0].emp_id} and working_date = current_date()`, (err, data) => {
-          try{
-            if (err) {
-                utilities.throwError("Error fetching employee profile", 400);
-            }
-            else{
-                if (data.affectedRows) {
-                    return utilities.sendSuccessResponse(res, data, "Logout successful");
-                } else {
-                    return utilities.sendErrorResponse(res, "Something went wrong", 400);
+            try {
+                if (err) {
+                    utilities.throwError("Error fetching employee profile", 400);
                 }
-            }    
-          } catch(e) {
-            return utilities.sendErrorResponse(res, "Something went wrong", 400);
-          }
+                else {
+                    if (data.affectedRows) {
+                        return utilities.sendSuccessResponse(res, data, "Logout successful");
+                    } else {
+                        return utilities.sendErrorResponse(res, "Something went wrong", 400);
+                    }
+                }
+            } catch (e) {
+                return utilities.sendErrorResponse(res, "Something went wrong", 400);
+            }
         })
     }
     catch (e) {
@@ -218,73 +218,24 @@ const profile = async (req, res) => {
       left join badge as b
       on eb.badge_id=b.id
       where e.emp_id=${req.employee[0].emp_id}`, (err, data) => {
-            try{
+            try {
                 if (err) {
                     utilities.throwError("Error fetching employee profile", 400);
                 }
-                else{
+                else {
                     if (data.length) {
                         var result = [];
                         data.forEach(obj => {
-                            if (result[0]) {
-                                var exist_or_not = 0;
-                                var index;
-                                result.forEach((element, i) => {
-                                    if (element.emp_id == obj.emp_id) {
-                                        exist_or_not = 1;
-                                        index = i
-                                    }
-                                })
-                                if (exist_or_not == 0) {
-                                    if (obj.id != null) {
-                                        result.push({
-                                            "emp_id": obj.emp_id,
-                                            "first_name": obj.first_name,
-                                            "last_name": obj.last_name,
-                                            "email": obj.email,
-                                            "password": obj.password,
-                                            "team_id": obj.team_id,
-                                            "team_name": obj.team_name,
-                                            "team_description": obj.team_description,
-                                            "team_leader": obj.team_leader,
-                                            "number_of_leaves_left": obj.num_of_leaves,
-                                            "emp_type": obj.emp_type,
-                                            "emp_position": obj.type_name,
-                                            "badge_earned": [{
-                                                "badge_id": obj.id,
-                                                "badge_name": obj.name,
-                                                "badge_description": obj.description,
-                                                "received_at": obj.receieved_at
-                                            }]
-                                        })
-                                    } else {
-                                        result.push({
-                                            "emp_id": obj.emp_id,
-                                            "first_name": obj.first_name,
-                                            "last_name": obj.last_name,
-                                            "email": obj.email,
-                                            "password": obj.password,
-                                            "team_id": obj.team_id,
-                                            "team_name": obj.team_name,
-                                            "team_description": obj.team_description,
-                                            "team_leader": obj.team_leader,
-                                            "number_of_leaves_left": obj.num_of_leaves,
-                                            "emp_type": obj.emp_type,
-                                            "emp_position": obj.type_name,
-                                            "badge_earned": [],
-                                        })
-                                    }
-                                } else {
-                                    if (obj.id != null) {
-                                        result[index]["badge_earned"].push({
-                                            "badge_id": obj.id,
-                                            "badge_name": obj.name,
-                                            "badge_description": obj.description,
-                                            "received_at": obj.receieved_at
-                                        })
-                                    }
+
+                            var exist_or_not = 0;
+                            var index;
+                            result.forEach((element, i) => {
+                                if (element.emp_id == obj.emp_id) {
+                                    exist_or_not = 1;
+                                    index = i
                                 }
-                            } else {
+                            })
+                            if (exist_or_not == 0) {
                                 if (obj.id != null) {
                                     result.push({
                                         "emp_id": obj.emp_id,
@@ -304,7 +255,7 @@ const profile = async (req, res) => {
                                             "badge_name": obj.name,
                                             "badge_description": obj.description,
                                             "received_at": obj.receieved_at
-                                        }],
+                                        }]
                                     })
                                 } else {
                                     result.push({
@@ -323,14 +274,23 @@ const profile = async (req, res) => {
                                         "badge_earned": [],
                                     })
                                 }
+                            } else {
+                                if (obj.id != null) {
+                                    result[index]["badge_earned"].push({
+                                        "badge_id": obj.id,
+                                        "badge_name": obj.name,
+                                        "badge_description": obj.description,
+                                        "received_at": obj.receieved_at
+                                    })
+                                }
                             }
                         })
                         return utilities.sendSuccessResponse(res, result, "Data fetched");
-                    }   
+                    }
                 }
             } catch (e) {
                 return utilities.sendErrorResponse(res, e.message, 400);
-            }            
+            }
         })
     } catch (e) {
         return utilities.sendErrorResponse(res, "Request Failed", 400);
@@ -344,7 +304,7 @@ const forgetPassword = async (req, res) => {
             return res.status(400).json({ data: false, message: "Invalid email", status: false })
         } else {
             await connection.query(`select * from employee where email="${req.body.email}"`, async (err, data) => {
-                try{
+                try {
                     if (err) {
                         utilities.throwError("Forgot password SQL Failure", 400);
                     } else if (data.length) {
@@ -372,7 +332,7 @@ const forgetPassword = async (req, res) => {
                     }
                 } catch (e) {
                     return utilities.sendErrorResponse(res, e.message, 400);
-                }                  
+                }
             })
         }
     } catch (e) {
@@ -387,7 +347,7 @@ const changePassword = async (req, res) => {
             const salt = bcrypt.genSaltSync(10);
             const password = bcrypt.hashSync(req.body.new_password, salt);
             await connection.query(`update employee set password="${password}" where emp_id=${req.employee[0].emp_id}`, (err, data) => {
-                try{
+                try {
                     if (err) {
                         utilities.throwError("Change password SQL Failure", 400);
                     } else if (data.affectedRows) {
@@ -395,12 +355,12 @@ const changePassword = async (req, res) => {
                     } else {
                         return utilities.sendErrorResponse(res, "something went wrong", 400);
                     }
-                } catch(e){
+                } catch (e) {
                     return utilities.sendErrorResponse(res, e.message, 400);
-                }                
+                }
             })
         } else {
-            return utilities.sendSuccessResponse(res, {data:false}, "The entered old password is incorrect");
+            return utilities.sendSuccessResponse(res, { data: false }, "The entered old password is incorrect");
         }
     } catch (e) {
         return utilities.sendErrorResponse(res, "Request failed", 400);
@@ -416,30 +376,41 @@ const fetchEmployeeHours = async (req, res) => {
       (select employee.emp_id from employee where team_id=${req.employee[0].team_id} and employee.emp_id!=${req.employee[0].emp_id})
       and working_date>DATE_SUB(current_date(), INTERVAL 21 DAY)
       order by working_date desc;`, (err, data) => {
-          try{
-            if (err) {
-                e.message = "Something went wrong";
-                e.status = 400;
-                throw e;
-            } else if (data.length) {
-                var result = []
-                data.forEach(obj => {
-                    if (result.length) {
-                        var exist_or_not = 0;
-                        var index;
-                        result.forEach((element, i) => {
-                            if (element.date == obj.working_date) {
-                                exist_or_not = 1;
-                                index = i
-                            }
-                        })
-                        if (exist_or_not) {
-                            result[index].employee_track.push({
-                                emp_id: obj.emp_id,
-                                first_name: obj.first_name,
-                                last_name: obj.last_name,
-                                duration: obj.duration
+            try {
+                if (err) {
+                    e.message = "Something went wrong";
+                    e.status = 400;
+                    throw e;
+                } else if (data.length) {
+                    var result = []
+                    data.forEach(obj => {
+                        if (result.length) {
+                            var exist_or_not = 0;
+                            var index;
+                            result.forEach((element, i) => {
+                                if (element.date == obj.working_date) {
+                                    exist_or_not = 1;
+                                    index = i
+                                }
                             })
+                            if (exist_or_not) {
+                                result[index].employee_track.push({
+                                    emp_id: obj.emp_id,
+                                    first_name: obj.first_name,
+                                    last_name: obj.last_name,
+                                    duration: obj.duration
+                                })
+                            } else {
+                                result.push({
+                                    date: obj.working_date,
+                                    employee_track: [{
+                                        emp_id: obj.emp_id,
+                                        first_name: obj.first_name,
+                                        last_name: obj.last_name,
+                                        duration: obj.duration
+                                    }]
+                                })
+                            }
                         } else {
                             result.push({
                                 date: obj.working_date,
@@ -451,25 +422,14 @@ const fetchEmployeeHours = async (req, res) => {
                                 }]
                             })
                         }
-                    } else {
-                        result.push({
-                            date: obj.working_date,
-                            employee_track: [{
-                                emp_id: obj.emp_id,
-                                first_name: obj.first_name,
-                                last_name: obj.last_name,
-                                duration: obj.duration
-                            }]
-                        })
-                    }
-                })
-                return utilities.sendSuccessResponse(res,result,"Hours tracking fetched")
-            } else {
-                return utilities.sendSuccessJSONResponse(data,{ data: [], message: "No Employee's Tracking Hour Found In Last 3 Weeks", status: true })
+                    })
+                    return utilities.sendSuccessResponse(res, result, "Hours tracking fetched")
+                } else {
+                    return utilities.sendSuccessJSONResponse(data, { data: [], message: "No Employee's Tracking Hour Found In Last 3 Weeks", status: true })
+                }
+            } catch (e) {
+                return utilities.sendErrorResponse(res, e.message, 400);
             }
-          } catch(e) {
-            return utilities.sendErrorResponse(res, e.message, 400);
-          }            
         })
     } catch (e) {
         return utilities.sendErrorResponse(res, "Request failed", 400);

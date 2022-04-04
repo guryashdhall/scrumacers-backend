@@ -60,20 +60,7 @@ const fetchStandUpForm = async (req, res) => {
     try {
         await connection.query(`SELECT * FROM scrum_form WHERE employee_id = ${req.employee[0].emp_id} 
     and DATE(creation_timestamp) = CURDATE();`, (err, data) => {
-            try {
-                if (err) {
-                    utilities.throwError("Fetch standup form SQL Failure", 400);
-                } else if (data.length) {
-                    return utilities.sendSuccessResponse(res, data, `Form fetched Successfully`);
-                }
-                else {
-                    return utilities.sendErrorResponse(res, `Form not found for today`, 400);
-                }
-
-            }
-            catch (e) {
-                return utilities.sendErrorResponse(res, "Some error occured", 400);
-            }
+            return returnFetchDataOutput(err, data, res, "Fetch standup form SQL Failure")
         })
     } catch (e) {
         return utilities.sendErrorResponse(res, "Request Failed", 400);
@@ -88,22 +75,26 @@ const fetchStandUpFormManager = async (req, res) => {
         WHERE a.team_id = ${req.employee[0].team_id} 
         and a.team_id=b.team_id and a.employee_id=c.emp_id
         and DATE(creation_timestamp) = CURDATE();`, (err, data) => {
-            try{
-                if (err) {
-                    utilities.throwError("Fetch Standup form for manager SQL Failure", 400);
-                } else if (data.length) {
-                    return utilities.sendSuccessResponse(res, data, `Form fetched Successfully`);
-                }
-                else {
-                    return utilities.sendErrorResponse(res, `Form not found for today`, 400);
-                }
-            }
-            catch (e) {
-                return utilities.sendErrorResponse(res, "Some error occured", 400);
-            }  
+            return returnFetchDataOutput(err, data, res, "Fetch Standup form for manager SQL Failure")
         })
     } catch (e) {
         return utilities.sendErrorResponse(res, "Request Failed", 400);
+    }
+}
+
+const returnFetchDataOutput = (err, data, res, errMessage) => {
+    try {
+        if (err) {
+            utilities.throwError(errMessage, 400);
+        } else if (data.length) {
+            return utilities.sendSuccessResponse(res, data, `Form fetched Successfully`);
+        }
+        else {
+            return utilities.sendErrorResponse(res, `Form not found for today`, 400);
+        }
+    }
+    catch (e) {
+        return utilities.sendErrorResponse(res, "Some error occured", 400);
     }
 }
 
