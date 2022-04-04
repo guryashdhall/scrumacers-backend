@@ -23,12 +23,12 @@ const createStandUpForm = async (req, res) => {
                             insertnotification += `,("${req.employee[0].first_name} ${req.employee[0].last_name} has faced ${req.body.blocker} blockage", ${req.employee[0].emp_id},${receiver[i].emp_id})`
                         }
                         insertnotification += `;`
-                        await connection.query(insertnotification, (err, result) => {
+                        await connection.query(insertnotification, (err2, result) => {
                             try {
-                                if (err) {
+                                if (err2) {
                                     utilities.throwError("something went wrong", 400);
                                 } else {
-                                    return utilities.sendSuccessResponse(res, data, `Form Submitted Successfully`);
+                                    return utilities.sendSuccessResponse(res, result, `Form Submitted Successfully`);
                                 }
                             }
                             catch (e) {
@@ -51,7 +51,7 @@ const createStandUpForm = async (req, res) => {
     catch (e) {
         return res
             .status(400)
-            .json({ data: false, message: `fail`, status: false });
+            .json({ data: false, message: `Request Failed`, status: false });
     }
 }
 
@@ -76,7 +76,7 @@ const fetchStandUpForm = async (req, res) => {
             }
         })
     } catch (e) {
-        return utilities.sendErrorResponse(res, "fail", 400);
+        return utilities.sendErrorResponse(res, "Request Failed", 400);
     }
 }
 
@@ -103,7 +103,7 @@ const fetchStandUpFormManager = async (req, res) => {
             }  
         })
     } catch (e) {
-        return utilities.sendErrorResponse(res, "fail", 400);
+        return utilities.sendErrorResponse(res, "Request Failed", 400);
     }
 }
 

@@ -17,17 +17,18 @@ const createSurvey = async (req, res) => {
               and e.emp_id!=${req.employee[0].emp_id};`)
                         if (employees.length) {
                             var insert_query = `insert into employee_survey (survey_id,employee_id) values (${data.insertId},${employees[0].emp_id})`;
-                            for (i = 1; i < employees.length; i++) {
+                            for (let i = 1; i < employees.length; i++) {
                                 insert_query += `,(${data.insertId},${employees[i].emp_id})`;
                             }
                             insert_query += `;`;
-                            await connection.query(insert_query, (err, data) => {
-                                if (err) {
+                            await connection.query(insert_query, (err2, data2) => {
+                                if (err2) {
                                     utilities.throwError("something went wrong", 400);
                                 }
-                                return utilities.sendSuccessResponse(res, data, `Survey added successfully`);
-                            }
-                            )
+                                else{
+                                    return utilities.sendSuccessResponse(res, data2, `Survey added successfully`);
+                                }                                
+                            })
                         } else {
                             return utilities.sendSuccessResponse(res, data, `Survey added successfully`);
                         }
@@ -40,7 +41,7 @@ const createSurvey = async (req, res) => {
                 }   
             })
     } catch (e) {
-        return utilities.sendErrorResponse(res, "fail", 400);
+        return utilities.sendErrorResponse(res, "Request Failed", 400);
     }
 }
 
@@ -67,7 +68,7 @@ const fillSurveyForm = async (req, res) => {
                 }
             })
     } catch (e) {
-        return utilities.sendErrorResponse(res, "fail", 400);
+        return utilities.sendErrorResponse(res, "Request Failed", 400);
     }
 }
 

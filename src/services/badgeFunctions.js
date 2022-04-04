@@ -132,8 +132,8 @@ const fetchBadgeForEmployee = async (req, res) => {
                 utilities.throwError("something went wrong",400); 
             }
             else{
-                await connection.query(`select * from badge`, (err, badge) => {
-                    if (err) {
+                await connection.query(`select * from badge`, (err2, badge) => {
+                    if (err2) {
                         utilities.throwError("something went wrong",400); 
                     }
                     else{
@@ -241,17 +241,17 @@ const updateEmployeeBadge = async (req, res) => {
                     else{
                         if (req.body.badge_id.length) {
                             var insert_badge_sql = `insert employee_badge (employee_id, badge_id) values (${req.body.emp_id}, ${req.body.badge_id[0]})`
-                            for (i = 1; i < req.body.badge_id.length; i++) {
+                            for (let i = 1; i < req.body.badge_id.length; i++) {
                                 insert_badge_sql += `,(${req.body.emp_id}, ${req.body.badge_id[i]})`
                             }
                             insert_badge_sql += `;`
-                            await connection.query(insert_badge_sql, (err, data) => {
-                                if (err) {
+                            await connection.query(insert_badge_sql, (err2, data2) => {
+                                if (err2) {
                                     utilities.throwError("something went wrong",400); 
                                 }
                                 else{
                                     if (data.affectedRows) {
-                                        return utilities.sendSuccessResponse(res,data,"Badges updated")
+                                        return utilities.sendSuccessResponse(res,data2,"Badges updated")
                                     } else {
                                         return utilities.sendErrorResponse(res,"Badges didn't update",400);
                                     }

@@ -21,9 +21,9 @@ async function wrapedSendMail(mailOptions) {
         },
       });
       
-      transporter.sendMail(mailOptions, function (error, info) {
+      transporter.sendMail(mailOptions, function (error, _info) {
         if (error) {
-          resolve(false); // or use rejcet(false) but then you will have to handle errors
+          resolve(false);
         } else {
           resolve(true);
         }
@@ -40,8 +40,7 @@ async function wrapedSendMail(mailOptions) {
         text: `Temporary Password has been created! Use this to login now: ${data.password}`,
         html: html_body, // html body
       };
-      let result = await wrapedSendMail(mailOptions);
-      return result;
+      return await wrapedSendMail(mailOptions);      
     } catch (e) {
       console.log(e);
     }

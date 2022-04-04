@@ -24,8 +24,8 @@ const login = async (req, res) => {
                             });
                             await connection.query(`start transaction;`);
                             await connection.query(`update employee set authentication_token='${auth_token}' where emp_id='${data[0].emp_id}';`,
-                                async (err, data1) => {
-                                    if (err) {
+                                async (err2, data1) => {
+                                    if (err2) {
                                         return utilities.sendErrorResponse(res, "Some error occured", 400);
                                     }
                                     else{
@@ -362,7 +362,7 @@ const forgetPassword = async (req, res) => {
                             };
                             await helper.sendEmailTemporaryPassword(send_data);
                             await connection.query('commit;');
-                            return utilities.sendSuccessResponse(res, result, "Temporary password has been sent");
+                            return utilities.sendSuccessResponse(res, result, "Temporary password has been sent to your email");
                         } else {
                             connection.query('rollback;')
                             return utilities.sendErrorResponse(res, "something went wrong", 400);
