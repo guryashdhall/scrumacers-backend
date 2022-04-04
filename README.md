@@ -1,4 +1,20 @@
-# Group 7 Development
+## CSCI 5308 : Final Project (Winter 2022)
+
+- Date Created: 04 Apr 2022
+- Last Modification Date: 04 Apr 2022
+- Git URL : Backend - https://git.cs.dal.ca/courses/2022-winter/csci-5308/group7/-/tree/development
+		Frontend - https://git.cs.dal.ca/golani/group7-frontend/-/tree/development 
+- Heroku URL: https://scrum-acers-frontend.herokuapp.com/
+- Authors:
+
+  [Sukaran Golani](sk300480@dal.ca)
+  [Aditya Dixit](ad433393@dal.ca)
+  [Guryash Dhall](guryash.dhall@dal.ca)
+  [Farhin Damania](fr454807@dal.ca)
+  [Parvish Gajjar](pr222321@dal.ca)
+
+![Logo](https://git.cs.dal.ca/golani/group7-frontend/-/blob/development/src/images/Logo.png "Scrum Acers Logo")
+ 
 
 ### This repository contains the backend and frontend code for the project of "Scrum Acers". To get started with this repository, follow the following steps:
 <br>
