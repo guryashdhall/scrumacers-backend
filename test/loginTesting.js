@@ -84,3 +84,26 @@ describe("POST api/user/login", () => {
       });
   });
 });
+
+describe("PUT api/user/logout", () => {
+  beforeEach(() => {
+    data = {
+      duration: 10,
+    };
+  });
+
+  it("Testing for logout", (done) => {
+    chai
+      .request(app)
+      .put("/api/user/logout")
+      .set("Authorization", `Bearer ${process.env.EMPLOYEE_TEST_TOKEN}`)
+      .send(data)
+      .end((err, res) => {
+        res.should.have.status(200);
+
+        res.body.should.have.property("message").eqls("Logout successful");
+
+        done();
+      });
+  });
+});
