@@ -82,23 +82,7 @@ const updateEmployeeBadge = async (req, res) => {
                     }
                     else {
                         if (req.body.badge_id.length) {
-                            var insert_badge_sql = `insert employee_badge (employee_id, badge_id) values (${req.body.emp_id}, ${req.body.badge_id[0]})`
-                            for (let i = 1; i < req.body.badge_id.length; i++) {
-                                insert_badge_sql += `,(${req.body.emp_id}, ${req.body.badge_id[i]})`
-                            }
-                            insert_badge_sql += `;`
-                            await connection.query(insert_badge_sql, (err2, data2) => {
-                                if (err2) {
-                                    utilities.throwError("Insert employee badges SQL Failure", 400);
-                                }
-                                else {
-                                    if (data2.affectedRows) {
-                                        return utilities.sendSuccessResponse(res, data2, "Badges updated")
-                                    } else {
-                                        return utilities.sendErrorResponse(res, "Badges didn't update", 400);
-                                    }
-                                }
-                            })
+                            return await insertBadge(req, res);
                         } else {
                             return utilities.sendSuccessResponse(res, data, "Badges updated")
                         }
@@ -110,6 +94,26 @@ const updateEmployeeBadge = async (req, res) => {
     } catch (e) {
         return utilities.sendErrorResponse(res, "Request Failed", 400);
     }
+}
+
+async function insertBadge(req, res) {
+    var insert_badge_sql = `insert employee_badge (employee_id, badge_id) values (${req.body.emp_id}, ${req.body.badge_id[0]})`;
+    for (let i = 1; i < req.body.badge_id.length; i++) {
+        insert_badge_sql += `,(${req.body.emp_id}, ${req.body.badge_id[i]})`;
+    }
+    insert_badge_sql += `;`;
+    await connection.query(insert_badge_sql, (err2, data2) => {
+        if (err2) {
+            utilities.throwError("Insert employee badges SQL Failure", 400);
+        }
+        else {
+            if (data2.affectedRows) {
+                return utilities.sendSuccessResponse(res, data2, "Badges updated");
+            } else {
+                return utilities.sendErrorResponse(res, "Badges didn't update", 400);
+            }
+        }
+    });
 }
 
 function formatResponseData(data, result, badge) {
