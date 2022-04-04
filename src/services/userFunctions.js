@@ -402,7 +402,6 @@ const changePassword = async (req, res) => {
         } else {
             return utilities.sendSuccessResponse(res, {data:false}, "The entered old password is incorrect");
         }
-        return utilities.sendSuccessJSONResponse(res,result);
     } catch (e) {
         return utilities.sendErrorResponse(res, "Request failed", 400);
     }
