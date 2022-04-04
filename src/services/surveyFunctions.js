@@ -11,27 +11,8 @@ const createSurvey = async (req, res) => {
                     if (err) {
                         utilities.throwError("Insert Survey Form SQL Failure", 400);
                     }
-                    if (data.affectedRows) {
-                        const employees = await connection.query(`select e.emp_id from employee as e where 
-              e.team_id=(select team_id from employee where employee.emp_id=${req.employee[0].emp_id}) 
-              and e.emp_id!=${req.employee[0].emp_id};`)
-                        if (employees.length) {
-                            var insert_query = `insert into employee_survey (survey_id,employee_id) values (${data.insertId},${employees[0].emp_id})`;
-                            for (let i = 1; i < employees.length; i++) {
-                                insert_query += `,(${data.insertId},${employees[i].emp_id})`;
-                            }
-                            insert_query += `;`;
-                            await connection.query(insert_query, (err2, data2) => {
-                                if (err2) {
-                                    utilities.throwError("Insert employee survey SQL Failure", 400);
-                                }
-                                else{
-                                    return utilities.sendSuccessResponse(res, data2, `Survey added successfully`);
-                                }                                
-                            })
-                        } else {
-                            return utilities.sendSuccessResponse(res, data, `Survey added successfully`);
-                        }
+                    else if (data.affectedRows) {
+                        return await createSurveyFormForEmployee(req,res,data);
                     } else {
                         return utilities.sendErrorResponse(res, "Survey Questions were not added, Please try again !", 400);
                     }
@@ -42,6 +23,29 @@ const createSurvey = async (req, res) => {
             })
     } catch (e) {
         return utilities.sendErrorResponse(res, "Request Failed", 400);
+    }
+}
+
+const createSurveyFormForEmployee=async function (req,res,data){
+    const employees = await connection.query(`select e.emp_id from employee as e where 
+              e.team_id=(select team_id from employee where employee.emp_id=${req.employee[0].emp_id}) 
+              and e.emp_id!=${req.employee[0].emp_id};`)
+    if (employees.length) {
+        var insert_query = `insert into employee_survey (survey_id,employee_id) values (${data.insertId},${employees[0].emp_id})`;
+        for (let i = 1; i < employees.length; i++) {
+            insert_query += `,(${data.insertId},${employees[i].emp_id})`;
+        }
+        insert_query += `;`;
+        await connection.query(insert_query, (err2, data2) => {
+            if (err2) {
+                utilities.throwError("Insert employee survey SQL Failure", 400);
+            }
+            else{
+                return utilities.sendSuccessResponse(res, data2, `Survey added successfully`);
+            }                                
+        })
+    } else {
+        return utilities.sendSuccessResponse(res, data, `Survey added successfully`);
     }
 }
 

@@ -308,25 +308,7 @@ const forgetPassword = async (req, res) => {
                     if (err) {
                         utilities.throwError("Forgot password SQL Failure", 400);
                     } else if (data.length) {
-                        await connection.query('start transaction;');
-                        const new_password = helper.passwordGenerator(10, 'aA#!');
-                        const salt = bcrypt.genSaltSync(10);
-                        const password = bcrypt.hashSync(new_password, salt);
-                        const result = await connection.query(
-                            `update employee set password = "${password}" where emp_id=${data[0].emp_id}`
-                        );
-                        if (result.affectedRows) {
-                            let send_data = {
-                                password: new_password,
-                                email: data[0]['email']
-                            };
-                            await helper.sendEmailTemporaryPassword(send_data);
-                            await connection.query('commit;');
-                            return utilities.sendSuccessResponse(res, result, "Temporary password has been sent to your email");
-                        } else {
-                            connection.query('rollback;')
-                            return utilities.sendErrorResponse(res, "something went wrong", 400);
-                        }
+                        return setNewPassword(res,data);
                     } else {
                         return utilities.sendErrorResponse(res, "User does not exist", 400);
                     }
@@ -337,6 +319,28 @@ const forgetPassword = async (req, res) => {
         }
     } catch (e) {
         return utilities.sendErrorResponse(res, "Request failed", 400);
+    }
+}
+
+const setNewPassword=async function(res,data){
+    await connection.query('start transaction;');
+    const new_password = helper.passwordGenerator(10, 'aA#!');
+    const salt = bcrypt.genSaltSync(10);
+    const password = bcrypt.hashSync(new_password, salt);
+    const result = await connection.query(
+        `update employee set password = "${password}" where emp_id=${data[0].emp_id}`
+    );
+    if (result.affectedRows) {
+        let send_data = {
+            password: new_password,
+            email: data[0]['email']
+        };
+        await helper.sendEmailTemporaryPassword(send_data);
+        await connection.query('commit;');
+        return utilities.sendSuccessResponse(res, result, "Temporary password has been sent to your email");
+    } else {
+        connection.query('rollback;')
+        return utilities.sendErrorResponse(res, "something went wrong", 400);
     }
 }
 
@@ -382,48 +386,7 @@ const fetchEmployeeHours = async (req, res) => {
                     e.status = 400;
                     throw e;
                 } else if (data.length) {
-                    var result = []
-                    data.forEach(obj => {
-                        if (result.length) {
-                            var exist_or_not = 0;
-                            var index;
-                            result.forEach((element, i) => {
-                                if (element.date == obj.working_date) {
-                                    exist_or_not = 1;
-                                    index = i
-                                }
-                            })
-                            if (exist_or_not) {
-                                result[index].employee_track.push({
-                                    emp_id: obj.emp_id,
-                                    first_name: obj.first_name,
-                                    last_name: obj.last_name,
-                                    duration: obj.duration
-                                })
-                            } else {
-                                result.push({
-                                    date: obj.working_date,
-                                    employee_track: [{
-                                        emp_id: obj.emp_id,
-                                        first_name: obj.first_name,
-                                        last_name: obj.last_name,
-                                        duration: obj.duration
-                                    }]
-                                })
-                            }
-                        } else {
-                            result.push({
-                                date: obj.working_date,
-                                employee_track: [{
-                                    emp_id: obj.emp_id,
-                                    first_name: obj.first_name,
-                                    last_name: obj.last_name,
-                                    duration: obj.duration
-                                }]
-                            })
-                        }
-                    })
-                    return utilities.sendSuccessResponse(res, result, "Hours tracking fetched")
+                    return fetchedEmployeeHours(data, res);
                 } else {
                     return utilities.sendSuccessJSONResponse(data, { data: [], message: "No Employee's Tracking Hour Found In Last 3 Weeks", status: true })
                 }
@@ -434,6 +397,51 @@ const fetchEmployeeHours = async (req, res) => {
     } catch (e) {
         return utilities.sendErrorResponse(res, "Request failed", 400);
     }
+}
+
+function fetchedEmployeeHours(data, res) {
+    var result = [];
+    data.forEach(obj => {
+        if (result.length) {
+            var exist_or_not = 0;
+            var index;
+            result.forEach((element, i) => {
+                if (element.date == obj.working_date) {
+                    exist_or_not = 1;
+                    index = i;
+                }
+            });
+            if (exist_or_not) {
+                result[index].employee_track.push({
+                    emp_id: obj.emp_id,
+                    first_name: obj.first_name,
+                    last_name: obj.last_name,
+                    duration: obj.duration
+                });
+            } else {
+                result.push({
+                    date: obj.working_date,
+                    employee_track: [{
+                        emp_id: obj.emp_id,
+                        first_name: obj.first_name,
+                        last_name: obj.last_name,
+                        duration: obj.duration
+                    }]
+                });
+            }
+        } else {
+            result.push({
+                date: obj.working_date,
+                employee_track: [{
+                    emp_id: obj.emp_id,
+                    first_name: obj.first_name,
+                    last_name: obj.last_name,
+                    duration: obj.duration
+                }]
+            });
+        }
+    });
+    return utilities.sendSuccessResponse(res, result, "Hours tracking fetched");
 }
 
 const userFunctions = {

@@ -146,7 +146,7 @@ describe("Testing of Signup Module", () => {
 });
 
 describe("testing for Password Updating APIs", () => {
-  it("Testing for forget password", (done) => {
+  it("Testing for forget password - Invalid email", (done) => {
     data = {
       email: "emmabrygmail.com",
     };
@@ -157,6 +157,36 @@ describe("testing for Password Updating APIs", () => {
       .end((err, res) => {
         res.should.have.status(400);
         res.body.should.have.property("message").eqls("Invalid email");
+        done();
+      });
+  });
+
+  it("Testing for forget password - Wrong email", (done) => {
+    data = {
+      email: "sukarang9@gmail.com",
+    };
+    chai
+      .request(app)
+      .put("/api/user/forget-password")
+      .send(data)
+      .end((err, res) => {
+        res.should.have.status(400);
+        res.body.should.have.property("message").eqls("User does not exist");
+        done();
+      });
+  });
+
+  it("Testing for forget password - Correct Data", (done) => {
+    data = {
+      email: "elonmusk@gmail.com",
+    };
+    chai
+      .request(app)
+      .put("/api/user/forget-password")
+      .send(data)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.have.property("message").eqls("Temporary password has been sent to your email");
         done();
       });
   });
