@@ -5,25 +5,29 @@ const leavesGet = async (req, res) => {
     await connection.query(
       `select emp_id as team_leader_emp_id, first_name,last_name,email from employee where emp_id=(select team_leader from employee a,team b where emp_id=${req.employee[0].emp_id} and a.team_id=b.team_id);`,
       (err, data) => {
-        try {
-          if (err) {
-            utilities.throwError("Error fetching employee's leader", 400);
-          } else {
-            if (data.length) {
-              return utilities.sendSuccessResponse(res, data, "Data fetched");
-            } else {
-              return utilities.sendErrorResponse(res,"No team leader information found",400);
-            }
-          }
-        } catch (e) {
-          return utilities.sendErrorResponse(res, "Some error occured", 400);
-        }
+        return leavesCommon(1,res,err,data,"Error fetching employee's leader","Data fetched","No team leader information found","Some error occured");
       }
     );
   } catch (e) {
     return utilities.sendErrorResponse(res, "Request Failed", 400);
   }
 };
+
+const leavesCommon=function(temp,res,err,data,errMsg,success,err2Msg,catchmsg){
+  try {
+    if (err) {
+      utilities.throwError(errMsg, 400);
+    } else {
+      if ((temp==1 && data.length) || (temp==2 && data.affectedRows)) {
+        return utilities.sendSuccessResponse(res, data, success);
+      } else {
+        return utilities.sendErrorResponse(res,err2Msg,400);
+      }
+    }
+  } catch (e) {
+    return utilities.sendErrorResponse(res, catchmsg, 400);
+  }
+}
 
 const leavesRaised = async (req, res) => {
   try {
@@ -148,20 +152,21 @@ const leavesRequest = async (req, res) => {
     await connection.query(
       `insert into leave_information values(null,${req.body.emp_id},${req.body.manager_id},'${req.body.leaveDesc}','${req.body.start_date}','${req.body.end_date}',DEFAULT,DEFAULT);`,
       (err, data) => {
-          try{
-            if (err) {
-                utilities.throwError("Failed to raise leave request", 400);
-            }
-            else{
-                if (data.affectedRows) {
-                    return utilities.sendSuccessResponse(res, data, data.affectedRows + " rows inserted");          
-                } else {
-                    return utilities.sendErrorResponse(res, "Failed to raise leave request", 400);
-                }
-            } 
-          } catch(e){
-            return utilities.sendErrorResponse(res, "Some error occured", 400);
-          }  
+        return leavesCommon(2,res,err,data,"Failed to raise leave request", data.affectedRows + " rows inserted","Failed to raise leave request","Some error occured");
+          // try{
+          //   if (err) {
+          //       utilities.throwError("Failed to raise leave request", 400);
+          //   }
+          //   else{
+          //       if (data.affectedRows) {
+          //           return utilities.sendSuccessResponse(res, data, data.affectedRows + " rows inserted");          
+          //       } else {
+          //           return utilities.sendErrorResponse(res, "Failed to raise leave request", 400);
+          //       }
+          //   } 
+          // } catch(e){
+          //   return utilities.sendErrorResponse(res, "Some error occured", 400);
+          // }            
       }
     );
   } catch (e) {
