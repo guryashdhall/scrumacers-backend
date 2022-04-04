@@ -250,7 +250,7 @@ const updateEmployeeBadge = async (req, res) => {
                                     utilities.throwError("something went wrong",400); 
                                 }
                                 else{
-                                    if (data.affectedRows) {
+                                    if (data2.affectedRows) {
                                         return utilities.sendSuccessResponse(res,data2,"Badges updated")
                                     } else {
                                         return utilities.sendErrorResponse(res,"Badges didn't update",400);
