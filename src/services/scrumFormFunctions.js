@@ -12,32 +12,7 @@ const createStandUpForm = async (req, res) => {
                 if (err) {
                     utilities.throwError("Insert scrum form SQL Failure", 400);
                 } else if (data.affectedRows) {
-                    const receiver = await connection.query(`select emp_id from employee 
-          where team_id=${req.employee[0].team_id} and emp_id!=${req.employee[0].emp_id};`);
-
-                    // Inserting notifications if there are blockers for any one of the team member
-                    if (req.body.blocker > 0 && receiver.length) {
-                        let insertnotification = `insert into notification (notification_description, notification_sender, notification_receiver)
-            values ("${req.employee[0].first_name} ${req.employee[0].last_name} has faced ${req.body.blocker} blockage", ${req.employee[0].emp_id},${receiver[0].emp_id})`
-                        for (let i = 1; i < receiver.length; i++) {
-                            insertnotification += `,("${req.employee[0].first_name} ${req.employee[0].last_name} has faced ${req.body.blocker} blockage", ${req.employee[0].emp_id},${receiver[i].emp_id})`
-                        }
-                        insertnotification += `;`
-                        await connection.query(insertnotification, (err2, result) => {
-                            try {
-                                if (err2) {
-                                    utilities.throwError("Insert Notification SQL Failure", 400);
-                                } else {
-                                    return utilities.sendSuccessResponse(res, result, `Form Submitted Successfully`);
-                                }
-                            }
-                            catch (e) {
-                                return utilities.sendErrorResponse(res, "Some error occured", 400);
-                            }
-                        })
-                    } else {
-                        return utilities.sendSuccessResponse(res, data, `Form Submitted Successfully`);
-                    }
+                    return await createNotificationForBlockers(req,res);
                 }
                 else {
                     return utilities.sendErrorResponse(res, "Form not inserted", 400);
@@ -52,6 +27,35 @@ const createStandUpForm = async (req, res) => {
         return res
             .status(400)
             .json({ data: false, message: `Request Failed`, status: false });
+    }
+}
+
+const createNotificationForBlockers=async function(req,res){
+    const receiver = await connection.query(`select emp_id from employee 
+          where team_id=${req.employee[0].team_id} and emp_id!=${req.employee[0].emp_id};`);
+
+    // Inserting notifications if there are blockers for any one of the team member
+    if (req.body.blocker > 0 && receiver.length) {
+        let insertnotification = `insert into notification (notification_description, notification_sender, notification_receiver)
+values ("${req.employee[0].first_name} ${req.employee[0].last_name} has faced ${req.body.blocker} blockage", ${req.employee[0].emp_id},${receiver[0].emp_id})`
+        for (let i = 1; i < receiver.length; i++) {
+            insertnotification += `,("${req.employee[0].first_name} ${req.employee[0].last_name} has faced ${req.body.blocker} blockage", ${req.employee[0].emp_id},${receiver[i].emp_id})`
+        }
+        insertnotification += `;`
+        await connection.query(insertnotification, (err2, result) => {
+            try {
+                if (err2) {
+                    utilities.throwError("Insert Notification SQL Failure", 400);
+                } else {
+                    return utilities.sendSuccessResponse(res, result, `Form Submitted Successfully`);
+                }
+            }
+            catch (e) {
+                return utilities.sendErrorResponse(res, "Some error occured", 400);
+            }
+        })
+    } else {
+        return utilities.sendSuccessResponse(res, data, `Form Submitted Successfully`);
     }
 }
 

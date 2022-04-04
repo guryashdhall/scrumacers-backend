@@ -120,9 +120,7 @@ const leavesRequest = async (req, res) => {
       }
     );
   } catch (e) {
-    return res
-      .status(400)
-      .json({ data: false, message: "Request Failed", status: false });
+    return utilities.sendErrorResponse(res, "Request Failed", 400);
   }
 };
 
