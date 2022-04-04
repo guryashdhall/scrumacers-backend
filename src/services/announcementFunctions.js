@@ -22,7 +22,7 @@ const fetchAnnouncements = async (req, res) => {
             }                        
         })
     } catch (e) {
-        return utilities.sendErrorResponse(res,"fail",400);
+        return utilities.sendErrorResponse(res,"Request Failed",400);
     }
 }
 
@@ -47,7 +47,7 @@ const postAnnouncement = async (req, res) => {
           }            
         })
     } catch (e) {
-        return utilities.sendErrorResponse(res,"fail",400);
+        return utilities.sendErrorResponse(res,"Request Failed",400);
     }
 }
 
@@ -71,7 +71,7 @@ const deleteAnnouncement = async (req, res) => {
                 }                                
             })
     } catch (e) {
-        return utilities.sendErrorResponse(res,"Something went wrong",400);
+        return utilities.sendErrorResponse(res,"Request Failed",400);
     }
 }
 

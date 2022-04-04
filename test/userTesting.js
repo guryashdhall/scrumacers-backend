@@ -50,7 +50,6 @@ describe("Testing of Signup Module", () => {
 
         it("Testing for create employee if fields are missing", (done) => {
             data = {}
-            console.log(process.env.HR_TEST_TOKEN)
             chai.request(app).post('/api/user/create-employee').set('Authorization', `Bearer ${process.env.HR_TEST_TOKEN}`)
                 .send(data)
                 .end((err, res) => {
