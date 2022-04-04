@@ -2,7 +2,7 @@ const utilities = require('../utils/utilities');
 const validate_announcement = require('../validation/validateAnnouncement');
 
 // Fetch Data - Announcement Module
-const fetchAnnouncements = async (req, res) => {    
+const fetchAnnouncements = async (_req, res) => {    
     try {
         await connection.query(`select e.first_name, e.last_name, e.email, e.emp_type, et.type_name as 'employee_position',
         t.team_name, a.* from announcement as a left join employee as e
@@ -12,7 +12,7 @@ const fetchAnnouncements = async (req, res) => {
         order by created_at desc;`, (err, data) => {
             try{
                 if (err) {
-                    utilities.throwError("something went wrong",400);  
+                    utilities.throwError("Fetch announcement SQL Failure",400);  
                 }
                 else{
                     return utilities.sendSuccessResponse(res,data,`announcements fetched`);                    
@@ -33,7 +33,7 @@ const postAnnouncement = async (req, res) => {
       ("${req.body.title}","${req.body.description}",${req.employee[0].emp_id});`, (err, data) => {
           try{
             if (err) {
-                utilities.throwError("something went wrong",400);                
+                utilities.throwError("Insert announcement SQL Failure",400);                
             }
             else{
                 if (data.affectedRows) {
@@ -57,7 +57,7 @@ const deleteAnnouncement = async (req, res) => {
             (err, data) => {
                 try{
                     if (err) {
-                        utilities.throwError("something went wrong",400); 
+                        utilities.throwError("Delete announcement SQL Failure",400); 
                     }
                     else{
                         if (data.affectedRows) {

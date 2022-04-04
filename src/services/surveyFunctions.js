@@ -9,7 +9,7 @@ const createSurvey = async (req, res) => {
             async (err, data) => {
                 try{
                     if (err) {
-                        utilities.throwError("something went wrong", 400);
+                        utilities.throwError("Insert Survey Form SQL Failure", 400);
                     }
                     if (data.affectedRows) {
                         const employees = await connection.query(`select e.emp_id from employee as e where 
@@ -23,7 +23,7 @@ const createSurvey = async (req, res) => {
                             insert_query += `;`;
                             await connection.query(insert_query, (err2, data2) => {
                                 if (err2) {
-                                    utilities.throwError("something went wrong", 400);
+                                    utilities.throwError("Insert employee survey SQL Failure", 400);
                                 }
                                 else{
                                     return utilities.sendSuccessResponse(res, data2, `Survey added successfully`);
@@ -55,7 +55,7 @@ const fillSurveyForm = async (req, res) => {
             (err, data) => {
                 try{
                     if (err) {
-                        utilities.throwError("something went wrong", 400);
+                        utilities.throwError("Update Employee Survey SQL Failure", 400);
                     }
                     if (data.affectedRows) {
                         return utilities.sendSuccessResponse(res, data, `Survey was filled by the Employee`);
@@ -95,7 +95,7 @@ const fetchSurveyEmployee = async (req, res) => {
             (err, data) => {
                 try{
                     if (err) {
-                        utilities.throwError("something went wrong", 400);
+                        utilities.throwError("Fetch Employee survey forms SQL Failure", 400);
                                     }
                      return utilities.sendSuccessResponse(res, data, `Survey Details fetched`);      
                 }
@@ -123,9 +123,11 @@ const fetchSurveyManager = async (req, res) => {
             (err, data) => {
                 try{
                     if (err) {
-                        utilities.throwError("something went wrong", 400);
+                        utilities.throwError("Fetch Survey for manager SQL Failure", 400);
                     }
-                    return utilities.sendSuccessResponse(res, data, `Survey Details fetched for employees`); 
+                    else{
+                        return utilities.sendSuccessResponse(res, data, `Survey Details fetched for employees`); 
+                    }                    
                 }
                 catch (e) {
                     return utilities.sendErrorResponse(res, "Something went wrong", 400);
@@ -145,9 +147,11 @@ const fetchSurveyListManager = async (req, res) => {
             (err, data) => {
                 try{
                     if (err) {
-                        utilities.throwError("something went wrong", 400);
+                        utilities.throwError("Fetch Survey Form List SQL Failure", 400);
                     }
-                    return utilities.sendSuccessResponse(res, data, `Survey List fetched`); 
+                    else{
+                        return utilities.sendSuccessResponse(res, data, `Survey List fetched`); 
+                    }                    
                 }
                 catch (e) {
                     return utilities.sendErrorResponse(res, "Something went wrong", 400);

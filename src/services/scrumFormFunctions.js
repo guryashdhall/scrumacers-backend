@@ -10,7 +10,7 @@ const createStandUpForm = async (req, res) => {
     "${req.body.q3}",${req.body.blocker});`, async (err, data) => {
             try {
                 if (err) {
-                    utilities.throwError("something went wrong", 400);
+                    utilities.throwError("Insert scrum form SQL Failure", 400);
                 } else if (data.affectedRows) {
                     const receiver = await connection.query(`select emp_id from employee 
           where team_id=${req.employee[0].team_id} and emp_id!=${req.employee[0].emp_id};`);
@@ -26,7 +26,7 @@ const createStandUpForm = async (req, res) => {
                         await connection.query(insertnotification, (err2, result) => {
                             try {
                                 if (err2) {
-                                    utilities.throwError("something went wrong", 400);
+                                    utilities.throwError("Insert Notification SQL Failure", 400);
                                 } else {
                                     return utilities.sendSuccessResponse(res, result, `Form Submitted Successfully`);
                                 }
@@ -62,7 +62,7 @@ const fetchStandUpForm = async (req, res) => {
     and DATE(creation_timestamp) = CURDATE();`, (err, data) => {
             try {
                 if (err) {
-                    utilities.throwError("something went wrong", 400);
+                    utilities.throwError("Fetch standup form SQL Failure", 400);
                 } else if (data.length) {
                     return utilities.sendSuccessResponse(res, data, `Form fetched Successfully`);
                 }
@@ -90,7 +90,7 @@ const fetchStandUpFormManager = async (req, res) => {
         and DATE(creation_timestamp) = CURDATE();`, (err, data) => {
             try{
                 if (err) {
-                    utilities.throwError("something went wrong", 400);
+                    utilities.throwError("Fetch Standup form for manager SQL Failure", 400);
                 } else if (data.length) {
                     return utilities.sendSuccessResponse(res, data, `Form fetched Successfully`);
                 }

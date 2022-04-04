@@ -9,7 +9,7 @@ const fetchNotifications = async (req, res) => {
             (err, data) => {
                 try{
                     if (err) {
-                        utilities.throwError("Something went wrong", 400);
+                        utilities.throwError("Fetch Notification SQL Failure", 400);
                     }
                     else{
                         return utilities.sendSuccessResponse(res, data, `Notifications fetched`);

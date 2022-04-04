@@ -11,13 +11,13 @@ const fetchEmployeeBadges = async (req, res) => {
       where e.team_id=${req.employee[0].team_id} and e.emp_id!=${req.employee[0].emp_id} ORDER BY e.emp_id;`, async (err, data) => {
           try{
             if (err) {
-                utilities.throwError("something went wrong",400); 
+                utilities.throwError("Fetch Employee Badges for Manager SQL Failure",400); 
             }
             else{
-                await connection.query(`select * from badge`, (err, badge) => {
+                await connection.query(`select * from badge`, (err2, badge) => {
                     try{
-                        if (err) {
-                            utilities.throwError("something went wrong",400); 
+                        if (err2) {
+                            utilities.throwError("Get Badges Manager SQL Failure",400); 
                         }
                         else{
                             var result = [];
@@ -129,12 +129,12 @@ const fetchBadgeForEmployee = async (req, res) => {
       on eb.badge_id=b.id
       where e.emp_id=${req.employee[0].emp_id};`, async (err, data) => {
             if (err) {
-                utilities.throwError("something went wrong",400); 
+                utilities.throwError("Fetch badges for employee SQL Failure",400); 
             }
             else{
                 await connection.query(`select * from badge`, (err2, badge) => {
                     if (err2) {
-                        utilities.throwError("something went wrong",400); 
+                        utilities.throwError("Fetch badge SQL Failure",400); 
                     }
                     else{
                         var result = [];
@@ -236,7 +236,7 @@ const updateEmployeeBadge = async (req, res) => {
             , async (err, data) => {
                 try{
                     if (err) {
-                        utilities.throwError("something went wrong",400); 
+                        utilities.throwError("Delete employee badges SQL Failure",400); 
                     }
                     else{
                         if (req.body.badge_id.length) {
@@ -247,7 +247,7 @@ const updateEmployeeBadge = async (req, res) => {
                             insert_badge_sql += `;`
                             await connection.query(insert_badge_sql, (err2, data2) => {
                                 if (err2) {
-                                    utilities.throwError("something went wrong",400); 
+                                    utilities.throwError("Insert employee badges SQL Failure",400); 
                                 }
                                 else{
                                     if (data2.affectedRows) {

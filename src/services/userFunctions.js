@@ -32,7 +32,7 @@ const login = async (req, res) => {
                                         if (data1.affectedRows) {
                                             const previous_day = await connection.query(`select * from hours_tracking where emp_id=${data[0].emp_id} and working_date=DATE_SUB(current_date(), INTERVAL 1 DAY);`)
                                             if (previous_day.length && previous_day[0].status === "Checked In") {
-                                                await connection.query(`update hours_tracking set duration=360 and status="Checked Out" where emp_id=${data[0].emp_id} and working_date=DATE_SUB(current_date(), INTERVAL 1 DAY);`)
+                                                await connection.query(`update hours_tracking set duration=360, status="Checked Out" where emp_id=${data[0].emp_id} and working_date=DATE_SUB(current_date(), INTERVAL 1 DAY);`)
                                             }
                                             const today = await connection.query(`select * from hours_tracking where emp_id=${data[0].emp_id} and working_date=CURRENT_DATE();`)
                                             if (today.length) {
@@ -113,7 +113,7 @@ const create_employee = async (req, res) => {
                 (err, data) => {
                     try {
                         if (err) {
-                            utilities.throwError("Something went wrong", 400);
+                            utilities.throwError("Create employee SQL Failure", 400);
                         }
                         else {
                             if (data.affectedRows) {
@@ -150,7 +150,7 @@ const fetch_all_employees = async (req, res) => {
                 (err, data) => {
                     try {
                         if (err) {
-                            utilities.throwError("Something went wrong", 400);
+                            utilities.throwError("Fetch employee SQL Failure", 400);
                         }
                         else {
                             if (data.length) {
@@ -182,7 +182,7 @@ const delete_employee = async (req, res) => {
                 (err, data) => {
                     try {
                         if (err) {
-                            utilities.throwError("Something went wrong", 400);
+                            utilities.throwError("Delete employee SQL Failure", 400);
                         }
                         else {
                             if (data[1].affectedRows) {
@@ -346,7 +346,7 @@ const forgetPassword = async (req, res) => {
             await connection.query(`select * from employee where email="${req.body.email}"`, async (err, data) => {
                 try{
                     if (err) {
-                        utilities.throwError("something went wrong", 400);
+                        utilities.throwError("Forgot password SQL Failure", 400);
                     } else if (data.length) {
                         await connection.query('start transaction;');
                         const new_password = helper.passwordGenerator(10, 'aA#!');
@@ -389,7 +389,7 @@ const changePassword = async (req, res) => {
             await connection.query(`update employee set password="${password}" where emp_id=${req.employee[0].emp_id}`, (err, data) => {
                 try{
                     if (err) {
-                        utilities.throwError("Something went wrong", 400);
+                        utilities.throwError("Change password SQL Failure", 400);
                     } else if (data.affectedRows) {
                         return utilities.sendSuccessResponse(res, data, "Password updated");
                     } else {
