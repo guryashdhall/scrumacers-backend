@@ -133,10 +133,10 @@ const returnLeaveOutput = async function (req, res, data) {
   console.log("func")    
   if (req.body.status === "approved") {
     console.log("func2")
+    let days=0
     try{
-      console.log(typeof(req.body.leave_start_date),typeof(req.body.leave_end_date))
-      req.body.leave_start_date = String(req.body.leave_start_date).replaceAll("-","/");
-      req.body.leave_end_date = String(req.body.leave_end_date).replaceAll("-","/");
+      req.body.leave_start_date = req.body.leave_start_date.split("-").join("/");
+      req.body.leave_end_date = req.body.leave_end_date.split("-").join("/");
       let date = new Date(req.body.leave_start_date);
       let date2 = new Date(req.body.leave_end_date);
       let days = (date2.getTime() - date.getTime()) / (1000 * 3600 * 24);
