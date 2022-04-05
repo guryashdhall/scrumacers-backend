@@ -46,6 +46,22 @@ describe("Testing of Signup Module", () => {
         });
     });
 
+    it("Testing for create employee api", (done) => {
+      data.first_name='"Aman'
+      chai
+        .request(app)
+        .post("/api/user/create-employee")
+        .set("Authorization", `Bearer ${process.env.HR_TEST_TOKEN}`)
+        .send(data)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.have
+            .property("message")
+            .eqls("Create employee SQL Failure");
+          done();
+        });
+    });
+
     it("Testing for create employee by unauthorized user", (done) => {
       chai
         .request(app)
@@ -89,6 +105,24 @@ describe("Testing of Signup Module", () => {
           res.body.should.have
             .property("message")
             .eqls("Employee doesn't exist!");
+          done();
+        });
+    });
+
+    it("Testing of delete employees functionality - sql failure", (done) => {
+      data = {
+        emp_id: '"1',
+      };
+      chai
+        .request(app)
+        .put("/api/user/delete_employee")
+        .set("Authorization", `Bearer ${process.env.HR_TEST_TOKEN}`)
+        .send(data)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.have
+            .property("message")
+            .eqls("Delete employee SQL Failure");
           done();
         });
     });
@@ -146,7 +180,7 @@ describe("Testing of Signup Module", () => {
 });
 
 describe("testing for Password Updating APIs", () => {
-  it("Testing for forget password", (done) => {
+  it("Testing for forget password - Invalid email", (done) => {
     data = {
       email: "emmabrygmail.com",
     };
@@ -157,6 +191,36 @@ describe("testing for Password Updating APIs", () => {
       .end((err, res) => {
         res.should.have.status(400);
         res.body.should.have.property("message").eqls("Invalid email");
+        done();
+      });
+  });
+
+  it("Testing for forget password - Wrong email", (done) => {
+    data = {
+      email: "sukarang9@gmail.com",
+    };
+    chai
+      .request(app)
+      .put("/api/user/forget-password")
+      .send(data)
+      .end((err, res) => {
+        res.should.have.status(400);
+        res.body.should.have.property("message").eqls("User does not exist");
+        done();
+      });
+  });
+
+  it("Testing for forget password - Correct Data", (done) => {
+    data = {
+      email: "elonmusk@gmail.com",
+    };
+    chai
+      .request(app)
+      .put("/api/user/forget-password")
+      .send(data)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.have.property("message").eqls("Temporary password has been sent to your email");
         done();
       });
   });
@@ -174,6 +238,22 @@ describe("testing for Password Updating APIs", () => {
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.have.property("message").eqls("Password updated");
+        done();
+      });
+  });
+  it("Testing for change password", (done) => {
+    data = {
+      old_password: "emmabryan1111111,-5",
+      new_password: "emmabryan5",
+    };
+    chai
+      .request(app)
+      .put("/api/user/change-password")
+      .set("Authorization", `Bearer ${process.env.EMPLOYEE_TEST_TOKEN}`)
+      .send(data)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.have.property("message").eqls("The entered old password is incorrect");
         done();
       });
   });

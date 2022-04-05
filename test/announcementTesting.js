@@ -46,11 +46,28 @@ describe("Testing of Announcement Module fucntionality", () => {
                 done();
             })
     })
+    it("Testing for insert announcement - sql failure", (done) => {
+        data.title='"abc'
+        chai.request(app).post('/api/user/post-announcement').set('Authorization', `Bearer ${process.env.MANAGER_TEST_TOKEN}`)
+            .send(data).end((err, res) => {
+                res.should.have.status(400);
+                res.body.should.have.property("message").eqls("Some error occured");
+                done();
+            })
+    })
     it("Testing for delete announcement", (done) => {
         chai.request(app).put('/api/user/delete-announcement').set('Authorization', `Bearer ${process.env.MANAGER_TEST_TOKEN}`)
             .send({post_id: 0}).end((err, res) => {
                 res.should.have.status(400);
                 res.body.should.have.property("message").eqls("Couldn't delete announcement. Try again!");
+                done();
+            })
+    })
+    it("Testing for delete announcement - sql failure", (done) => {
+        chai.request(app).put('/api/user/delete-announcement').set('Authorization', `Bearer ${process.env.MANAGER_TEST_TOKEN}`)
+            .send({post_id: '"ab'}).end((err, res) => {
+                res.should.have.status(400);
+                res.body.should.have.property("message").eqls("Some error occured");
                 done();
             })
     })

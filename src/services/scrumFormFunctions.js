@@ -12,32 +12,7 @@ const createStandUpForm = async (req, res) => {
                 if (err) {
                     utilities.throwError("Insert scrum form SQL Failure", 400);
                 } else if (data.affectedRows) {
-                    const receiver = await connection.query(`select emp_id from employee 
-          where team_id=${req.employee[0].team_id} and emp_id!=${req.employee[0].emp_id};`);
-
-                    // Inserting notifications if there are blockers for any one of the team member
-                    if (req.body.blocker > 0 && receiver.length) {
-                        let insertnotification = `insert into notification (notification_description, notification_sender, notification_receiver)
-            values ("${req.employee[0].first_name} ${req.employee[0].last_name} has faced ${req.body.blocker} blockage", ${req.employee[0].emp_id},${receiver[0].emp_id})`
-                        for (i = 1; i < receiver.length; i++) {
-                            insertnotification += `,("${req.employee[0].first_name} ${req.employee[0].last_name} has faced ${req.body.blocker} blockage", ${req.employee[0].emp_id},${receiver[i].emp_id})`
-                        }
-                        insertnotification += `;`
-                        await connection.query(insertnotification, (err2, result) => {
-                            try {
-                                if (err2) {
-                                    utilities.throwError("Insert Notification SQL Failure", 400);
-                                } else {
-                                    return utilities.sendSuccessResponse(res, result, `Form Submitted Successfully`);
-                                }
-                            }
-                            catch (e) {
-                                return utilities.sendErrorResponse(res, "Some error occured", 400);
-                            }
-                        })
-                    } else {
-                        return utilities.sendSuccessResponse(res, data, `Form Submitted Successfully`);
-                    }
+                    return await createNotificationForBlockers(req,res);
                 }
                 else {
                     return utilities.sendErrorResponse(res, "Form not inserted", 400);
@@ -55,25 +30,41 @@ const createStandUpForm = async (req, res) => {
     }
 }
 
+const createNotificationForBlockers=async function(req,res){
+    const receiver = await connection.query(`select emp_id from employee 
+          where team_id=${req.employee[0].team_id} and emp_id!=${req.employee[0].emp_id};`);
+
+    // Inserting notifications if there are blockers for any one of the team member
+    if (req.body.blocker > 0 && receiver.length) {
+        let insertnotification = `insert into notification (notification_description, notification_sender, notification_receiver)
+values ("${req.employee[0].first_name} ${req.employee[0].last_name} has faced ${req.body.blocker} blockage", ${req.employee[0].emp_id},${receiver[0].emp_id})`
+        for (let i = 1; i < receiver.length; i++) {
+            insertnotification += `,("${req.employee[0].first_name} ${req.employee[0].last_name} has faced ${req.body.blocker} blockage", ${req.employee[0].emp_id},${receiver[i].emp_id})`
+        }
+        insertnotification += `;`
+        await connection.query(insertnotification, (err2, result) => {
+            try {
+                if (err2) {
+                    utilities.throwError("Insert Notification SQL Failure", 400);
+                } else {
+                    return utilities.sendSuccessResponse(res, result, `Form Submitted Successfully`);
+                }
+            }
+            catch (e) {
+                return utilities.sendErrorResponse(res, "Some error occured", 400);
+            }
+        })
+    } else {
+        return utilities.sendSuccessResponse(res, data, `Form Submitted Successfully`);
+    }
+}
+
 // To fetch the details of stand up form filled by an employee
 const fetchStandUpForm = async (req, res) => {
     try {
         await connection.query(`SELECT * FROM scrum_form WHERE employee_id = ${req.employee[0].emp_id} 
     and DATE(creation_timestamp) = CURDATE();`, (err, data) => {
-            try {
-                if (err) {
-                    utilities.throwError("Fetch standup form SQL Failure", 400);
-                } else if (data.length) {
-                    return utilities.sendSuccessResponse(res, data, `Form fetched Successfully`);
-                }
-                else {
-                    return utilities.sendErrorResponse(res, `Form not found for today`, 400);
-                }
-
-            }
-            catch (e) {
-                return utilities.sendErrorResponse(res, "Some error occured", 400);
-            }
+            return returnFetchDataOutput(err, data, res, "Fetch standup form SQL Failure")
         })
     } catch (e) {
         return utilities.sendErrorResponse(res, "Request Failed", 400);
@@ -88,22 +79,26 @@ const fetchStandUpFormManager = async (req, res) => {
         WHERE a.team_id = ${req.employee[0].team_id} 
         and a.team_id=b.team_id and a.employee_id=c.emp_id
         and DATE(creation_timestamp) = CURDATE();`, (err, data) => {
-            try{
-                if (err) {
-                    utilities.throwError("Fetch Standup form for manager SQL Failure", 400);
-                } else if (data.length) {
-                    return utilities.sendSuccessResponse(res, data, `Form fetched Successfully`);
-                }
-                else {
-                    return utilities.sendErrorResponse(res, `Form not found for today`, 400);
-                }
-            }
-            catch (e) {
-                return utilities.sendErrorResponse(res, "Some error occured", 400);
-            }  
+            return returnFetchDataOutput(err, data, res, "Fetch Standup form for manager SQL Failure")
         })
     } catch (e) {
         return utilities.sendErrorResponse(res, "Request Failed", 400);
+    }
+}
+
+const returnFetchDataOutput = (err, data, res, errMessage) => {
+    try {
+        if (err) {
+            utilities.throwError(errMessage, 400);
+        } else if (data.length) {
+            return utilities.sendSuccessResponse(res, data, `Form fetched Successfully`);
+        }
+        else {
+            return utilities.sendErrorResponse(res, `Form not found for today`, 400);
+        }
+    }
+    catch (e) {
+        return utilities.sendErrorResponse(res, "Some error occured", 400);
     }
 }
 
