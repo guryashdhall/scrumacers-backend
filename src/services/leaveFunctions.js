@@ -130,7 +130,7 @@ const returnLeaveOutput = async function (req, res, data) {
     req.body.leave_end_date = req.body.leave_end_date.split("-").join("/");
     let date = new Date(req.body.leave_start_date);
     let date2 = new Date(req.body.leave_end_date);
-    days = (date2.getTime() - date.getTime()) / (1000 * 3600 * 24);
+    let days = (date2.getTime() - date.getTime()) / (1000 * 3600 * 24);
     return updateApprovedLeave(days, req, res);
   } else {
     if (data.affectedRows) {
