@@ -116,7 +116,7 @@ const leavesRequest = async (req, res) => {
     await connection.query(
       `insert into leave_information values(null,${req.body.emp_id},${req.body.manager_id},'${req.body.leaveDesc}','${req.body.start_date}','${req.body.end_date}',DEFAULT,DEFAULT);`,
       (err, data) => {
-        return leavesCommon(2, res, err, data, "Failed to raise leave request", data.affectedRows + " rows inserted", "Failed to raise leave request");
+        return leavesCommon(2, res, err, data, "Failed to raise leave request", `${data ? data.affectedRows : 0} rows inserted`, "Failed to raise leave request");
       }
     );
   } catch (e) {
@@ -124,7 +124,7 @@ const leavesRequest = async (req, res) => {
   }
 };
 
-const returnLeaveOutput = async function(req, res, data){
+const returnLeaveOutput = async function (req, res, data) {
   req.body.leave_start_date = req.body.leave_start_date.replaceAll(
     "-",
     "/"
@@ -135,9 +135,9 @@ const returnLeaveOutput = async function(req, res, data){
   );
   let date = new Date(req.body.leave_start_date);
   let date2 = new Date(req.body.leave_end_date);
-  let days = (date2.getTime() - date.getTime()) / (1000 * 3600 * 24);  
+  let days = (date2.getTime() - date.getTime()) / (1000 * 3600 * 24);
   if (req.body.status === "approved") {
-    return await updateApprovedLeave(days, req, res);
+    return updateApprovedLeave(days, req, res);
   } else {
     if (data.affectedRows) {
       return utilities.sendSuccessResponse(res, data, "Data Updated");
