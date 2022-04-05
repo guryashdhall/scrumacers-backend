@@ -241,4 +241,20 @@ describe("testing for Password Updating APIs", () => {
         done();
       });
   });
+  it("Testing for change password", (done) => {
+    data = {
+      old_password: "emmabryan1111111,-5",
+      new_password: "emmabryan5",
+    };
+    chai
+      .request(app)
+      .put("/api/user/change-password")
+      .set("Authorization", `Bearer ${process.env.EMPLOYEE_TEST_TOKEN}`)
+      .send(data)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.have.property("message").eqls("The entered old password is incorrect");
+        done();
+      });
+  });
 });
