@@ -33,6 +33,15 @@ describe("Testing of Scrum form fucntionality", () => {
         done();
       })
     })
+    it("Testing for standup form submission - sql failure", (done) => {
+      data.q1='"abcadeda'
+      chai.request(app).post('/api/user/dailyStandUpForm').set('Authorization',`Bearer ${process.env.EMPLOYEE_TEST_TOKEN}`)
+      .send(data).end((err, res) => {
+        res.should.have.status(400);
+        res.body.should.have.property("message").eqls("Some error occured");
+        done();
+      })
+    })
     it("Testing for fetch standup form", (done) => {
       chai.request(app).get('/api/user/fetchStandUpForm').set('Authorization',`Bearer ${process.env.EMPLOYEE_TEST_TOKEN}`)
       .end((err, res) => {
