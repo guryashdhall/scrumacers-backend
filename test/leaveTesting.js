@@ -87,7 +87,7 @@ describe("Testing of Leave Management Module", () => {
         }
         chai.request(app).put('/api/user/leavesApproveReject').set('Authorization', `Bearer ${process.env.MANAGER_TEST_TOKEN}`)
             .send(data).end((err, res) => {
-                res.should.have.status(200);
+                res.should.have.status(400);
                 res.body.should.have.property("message").eqls("Data Updated");
                 done();
             })
@@ -102,7 +102,7 @@ describe("Testing of Leave Management Module", () => {
         }
         chai.request(app).put('/api/user/leavesApproveReject').set('Authorization', `Bearer ${process.env.MANAGER_TEST_TOKEN}`)
             .send(data).end((err, res) => {
-                res.should.have.status(200);
+                res.should.have.status(400);
                 res.body.should.have.property("message").eqls("Data Updated");
                 done();
             })
