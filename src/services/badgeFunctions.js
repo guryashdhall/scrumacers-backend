@@ -104,7 +104,7 @@ async function insertBadge(req, res) {
     insert_badge_sql += `;`;
     await connection.query(insert_badge_sql, (err2, data2) => {
         if (err2) {
-            utilities.throwError("Insert employee badges SQL Failure", 400);
+            return utilities.sendErrorResponse(res,"Insert employee badges SQL Failure", 400);
         }
         else {
             if (data2.affectedRows) {
