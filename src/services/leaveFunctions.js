@@ -1,5 +1,6 @@
 const utilities = require("../utils/utilities");
 
+// Fetch infomation to shown on leave form
 const leavesGet = async (req, res) => {
   try {
     await connection.query(
@@ -13,6 +14,7 @@ const leavesGet = async (req, res) => {
   }
 };
 
+// common parameterised function to respond to fetch functions
 const leavesCommon = function (temp, res, err, data, errMsg, success, err2Msg) {
   try {
     if (err) {
@@ -29,6 +31,7 @@ const leavesCommon = function (temp, res, err, data, errMsg, success, err2Msg) {
   }
 }
 
+// Fetching leaves raised by an employee
 const leavesRaised = async (req, res) => {
   try {
     await connection.query(
@@ -58,6 +61,7 @@ const leavesRaised = async (req, res) => {
   }
 };
 
+// Fetching employee requests for manager to approve or reject
 const leavesRequestsReceived = async (req, res) => {
   try {
     await connection.query(
@@ -86,6 +90,7 @@ const leavesRequestsReceived = async (req, res) => {
   }
 };
 
+// Approval/Reject employee requests for leave
 const leavesApproveReject = async (req, res) => {
   try {
     await connection.query(
@@ -111,6 +116,7 @@ const leavesApproveReject = async (req, res) => {
   }
 };
 
+// Raising leave request for employee
 const leavesRequest = async (req, res) => {
   try {
     await connection.query(
@@ -124,6 +130,7 @@ const leavesRequest = async (req, res) => {
   }
 };
 
+// Return output for update leave information(approve/reject) [Created function to reduce complexity] 
 const returnLeaveOutput = async function (req, res, data) {
   if (req.body.status === "approved") {
     req.body.leave_start_date = req.body.leave_start_date.split("-").join("/");
@@ -141,6 +148,7 @@ const returnLeaveOutput = async function (req, res, data) {
   }
 }
 
+//  updating approved leave [Created function to reduce complexity]
 const updateApprovedLeave = async (days, req, res) => {
   await connection.query(
     `update employee set num_of_leaves=num_of_leaves-${days} where emp_id='${req.body.employee_id}';`,

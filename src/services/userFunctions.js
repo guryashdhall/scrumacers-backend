@@ -159,7 +159,7 @@ const delete_employee = async (req, res) => {
     }
 };
 
-// Code which helped verify authentication
+// Fetch Profile Data for all employees
 const profile = async (req, res) => {
     try {
         await connection.query(`select e.*, et.type_name, t.team_name, t.team_description, t.team_leader, b.* from employee as e left join team as t
@@ -191,7 +191,7 @@ const profile = async (req, res) => {
     }
 }
 
-// Function for forgot password functionality
+// Function for forgot password functionality where new password would be generaated and sent in their email
 const forgetPassword = async (req, res) => {
     try {
         if (!validate_email.validateEmail(req.body.email)) {
@@ -216,6 +216,7 @@ const forgetPassword = async (req, res) => {
     }
 }
 
+// set new password function created to reduce complexity for Forget Password 
 const setNewPassword = async function (res, data) {
     await connection.query('start transaction;');
     const new_password = helper.passwordGenerator(10, 'aA#!');
@@ -238,6 +239,7 @@ const setNewPassword = async function (res, data) {
     }
 }
 
+// User can change their password from their profile using this function
 const changePassword = async (req, res) => {
     try {
         const result = await bcrypt.compare(req.body.old_password, req.employee[0].password);
@@ -265,6 +267,7 @@ const changePassword = async (req, res) => {
     }
 }
 
+// Fetch employees tracking hours of employees for manager
 const fetchEmployeeHours = async (req, res) => {
     try {
         await connection.query(`select hours_tracking.emp_id, employee.first_name,employee.last_name, date_format(working_date,"%Y-%m-%d") as "working_date",
@@ -293,6 +296,7 @@ const fetchEmployeeHours = async (req, res) => {
     }
 }
 
+// formatting profile data - specifically badges (made sqparate function to reduce complexity)
 function formatProfileData(data, result) {
     data.forEach(obj => {
         var exist_or_not = 0;
@@ -356,6 +360,7 @@ function formatProfileData(data, result) {
     return result;
 }
 
+// Employee data would be insesrted in database
 async function insertEmployee(query, res) {
     await connection.query(query,
         (err, data) => {
@@ -377,6 +382,7 @@ async function insertEmployee(query, res) {
         });
 }
 
+// Updating users authentication token and also triggering employees tracking hour (reducing complexity of code)
 async function updateEmployeeAuthToken(auth_token, data, res) {
     await connection.query(`update employee set authentication_token='${auth_token}' where emp_id='${data[0].emp_id}';`,
         async (err2, data1) => {
@@ -394,6 +400,7 @@ async function updateEmployeeAuthToken(auth_token, data, res) {
         });
 }
 
+// Updating employee hours in login function and setting status to "Checked In"
 async function updateEmployeeHours(data, res, auth_token) {
     const previous_day = await connection.query(`select * from hours_tracking where emp_id=${data[0].emp_id} and working_date=DATE_SUB(current_date(), INTERVAL 1 DAY);`);
     if (previous_day.length && previous_day[0].status === "Checked In") {
@@ -415,6 +422,7 @@ async function updateEmployeeHours(data, res, auth_token) {
     });
 }
 
+// Fetching employees work hours for Manager/Team Leads View
 function fetchedEmployeeHours(data, res) {
     var result = [];
     data.forEach(obj => {

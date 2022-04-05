@@ -26,6 +26,8 @@ const createSurvey = async (req, res) => {
     }
 }
 
+// inserting employee id to employee survey in order to later use join for fetching data 
+// (created separate function to reduce code smell)
 const createSurveyFormForEmployee=async function (req,res,data){
     const employees = await connection.query(`select e.emp_id from employee as e where 
               e.team_id=(select team_id from employee where employee.emp_id=${req.employee[0].emp_id}) 
@@ -50,7 +52,6 @@ const createSurveyFormForEmployee=async function (req,res,data){
 }
 
 // Function for employees within a team to fill the survey form
-
 const fillSurveyForm = async (req, res) => {
     try {
         await connection.query(`update employee_survey set answer_1 ="${req.body.answer_1}" ,
