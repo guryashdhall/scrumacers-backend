@@ -19,7 +19,7 @@ const login = async (req, res) => {
                         const passwordCompare = bcrypt.compareSync(req.body.password, data[0].password);
                         if (passwordCompare) {
                             let auth_token = "";
-                            auth_token = jwt.sign({ result: { emp_id: data[0].emp_id } }, "afgps7", {
+                            auth_token = jwt.sign({ result: { emp_id: data[0].emp_id } }, process.env.AUTH_SECURITY_TOKEN, {
                                 expiresIn: "10h",
                             });
                             await connection.query(`start transaction;`);

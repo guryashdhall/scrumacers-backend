@@ -8,7 +8,7 @@ const isAuthenticated = (req, res, next) => {
     if (token) {
       // Remove Bearer from string
       token = token.slice(7);
-      jwt.verify(token, "afgps7", async (err, decoded) => {
+      jwt.verify(token, process.env.AUTH_SECURITY_TOKEN, async (err, decoded) => {
         if (err) {
           return utilities.sendErrorResponse(res,"Invalid Token...",401);
         } else {
