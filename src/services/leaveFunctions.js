@@ -96,7 +96,7 @@ const leavesApproveReject = async (req, res) => {
             utilities.throwError(`Error updating leave id ${req.body.leaveId}`, 400);
           } else {
             if (data.affectedRows) {
-              return await returnBadgeOutput(req, res);
+              return await returnLeaveOutput(req, res, data);
             } else {
               return utilities.sendErrorResponse(res, "Leave Id not found", 400);
             }
@@ -124,7 +124,7 @@ const leavesRequest = async (req, res) => {
   }
 };
 
-const returnBadgeOutput = async (req, res) => {
+const returnLeaveOutput = async function(req, res, data){
   req.body.leave_start_date = req.body.leave_start_date.replaceAll(
     "-",
     "/"
@@ -135,9 +135,9 @@ const returnBadgeOutput = async (req, res) => {
   );
   let date = new Date(req.body.leave_start_date);
   let date2 = new Date(req.body.leave_end_date);
-  let days = (date2.getTime() - date.getTime()) / (1000 * 3600 * 24);
+  let days = (date2.getTime() - date.getTime()) / (1000 * 3600 * 24);  
   if (req.body.status === "approved") {
-    return updateApprovedLeave(days, req, res);
+    return await updateApprovedLeave(days, req, res);
   } else {
     if (data.affectedRows) {
       return utilities.sendSuccessResponse(res, data, "Data Updated");

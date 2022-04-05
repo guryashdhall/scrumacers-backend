@@ -229,7 +229,6 @@ const setNewPassword = async function (res, data) {
             password: new_password,
             email: data[0]['email']
         };
-        console.log(new_password);
         await helper.sendEmailTemporaryPassword(send_data);
         await connection.query('commit;');
         return utilities.sendSuccessResponse(res, result, "Temporary password has been sent to your email");
