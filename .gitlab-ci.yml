@@ -3,6 +3,10 @@ image: node:latest
 stages:
   - backend-build
   - backend-test
+  - code-quality
+  - backend-build-main
+  - backend-test-main
+  - code-quality-main
 
 backend-build:
   type: deploy
@@ -23,3 +27,68 @@ backend-test:
   script: 
     - npm install
     - npm test
+
+variables:
+  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar" # Defines the location of the analysis task cache
+  SONAR_TOKEN: $SONAR_TOKEN
+
+code-quality-check:
+   stage: code-quality
+   only:
+    - development  
+   image:
+     name: sonarsource/sonar-scanner-cli:latest
+     entrypoint: [""]
+   cache:
+     key: "${CI_JOB_NAME}"
+     paths:
+       - .sonar/cache
+   script:
+     - echo "Starting SonarCloud Code Quality Check" 
+     - npm install    
+     - npm test
+     - sonar-scanner
+     - echo "Completed SonarCloud Code Quality Check"
+
+
+backend-build-main:
+  type: deploy
+  stage: backend-build
+  image: ruby:latest
+  only:
+    - main
+  script:
+    - apt-get update -qy
+    - apt-get install -y ruby-dev
+    - gem install dpl
+    - dpl --provider=heroku --app=$HEROKU_APP_BACKEND --api-key=$HEROKU_API_KEY
+
+backend-test-main:
+  stage: backend-test
+  only:
+    - main
+  script: 
+    - npm install
+    - npm test
+
+variables:
+  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar" # Defines the location of the analysis task cache
+  SONAR_TOKEN: $SONAR_TOKEN
+
+code-quality-check-main:
+   stage: code-quality
+   only:
+    - main  
+   image:
+     name: sonarsource/sonar-scanner-cli:latest
+     entrypoint: [""]
+   cache:
+     key: "${CI_JOB_NAME}"
+     paths:
+       - .sonar/cache
+   script:
+     - echo "Starting SonarCloud Code Quality Check" 
+     - npm install    
+     - npm test
+     - sonar-scanner
+     - echo "Completed SonarCloud Code Quality Check"

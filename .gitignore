@@ -2,7 +2,11 @@
 node_modules/
 
 # Environment variables file
-.env
+# .env
 
-# Output
+# Outputs
 dist
+
+coverage/
+
+.nyc_output
