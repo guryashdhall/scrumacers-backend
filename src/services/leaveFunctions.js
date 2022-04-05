@@ -88,21 +88,16 @@ const leavesRequestsReceived = async (req, res) => {
 
 const leavesApproveReject = async (req, res) => {
   try {
-    console.log(req.body)
     await connection.query(
       `update leave_information set status='${req.body.status}' where leave_id='${req.body.leaveId}'`,
       async (err, data) => {
         try {
           if (err) {
             utilities.throwError(`Error updating leave id ${req.body.leaveId}`, 400);
-          } else {
-            console.log("hi")
-            console.log(data)            
+          } else {          
             if (data.affectedRows) {
-              console.log("hi2")
               return await returnLeaveOutput(req, res, data);
             } else {
-              console.log("hi3")
               return utilities.sendErrorResponse(res, "Leave Id not found", 400);
             }
           }
@@ -130,21 +125,15 @@ const leavesRequest = async (req, res) => {
 };
 
 const returnLeaveOutput = async function (req, res, data) {
-  console.log("func")    
   if (req.body.status === "approved") {
-    console.log("func2")
     req.body.leave_start_date = req.body.leave_start_date.split("-").join("/");
     req.body.leave_end_date = req.body.leave_end_date.split("-").join("/");
     let date = new Date(req.body.leave_start_date);
     let date2 = new Date(req.body.leave_end_date);
     days = (date2.getTime() - date.getTime()) / (1000 * 3600 * 24);
-    console.log(days)
-    
-    console.log("bye")
     return updateApprovedLeave(days, req, res);
   } else {
     if (data.affectedRows) {
-      console.log("bye2")
       return utilities.sendSuccessResponse(res, data, "Data Updated");
     } else {
       return utilities.sendErrorResponse(res, "Failed to find leave id", 400);
@@ -157,7 +146,6 @@ const updateApprovedLeave = async (days, req, res) => {
     `update employee set num_of_leaves=num_of_leaves-${days} where emp_id='${req.body.employee_id}';`,
     (err2, data2) => {
       try {
-        console.log(err2,data2)
         if (err2) {
           utilities.throwError("Failed to deduct employee's leaves", 400);
         } else {

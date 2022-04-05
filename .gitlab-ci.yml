@@ -2,7 +2,7 @@ image: node:latest
 
 stages:
   - backend-build
-  # - backend-test
+  - backend-test
   - code-quality
 
 backend-build:
@@ -17,13 +17,13 @@ backend-build:
     - gem install dpl
     - dpl --provider=heroku --app=$HEROKU_APP_BACKEND --api-key=$HEROKU_API_KEY
 
-# backend-test:
-#   stage: backend-test
-#   only:
-#     - development
-#   script: 
-#     - npm install
-#     - npm test
+backend-test:
+  stage: backend-test
+  only:
+    - development
+  script: 
+    - npm install
+    - npm test
 
 variables:
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar" # Defines the location of the analysis task cache
