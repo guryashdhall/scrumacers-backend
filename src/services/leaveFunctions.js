@@ -88,6 +88,7 @@ const leavesRequestsReceived = async (req, res) => {
 
 const leavesApproveReject = async (req, res) => {
   try {
+    console.log(req.body)
     await connection.query(
       `update leave_information set status='${req.body.status}' where leave_id='${req.body.leaveId}'`,
       async (err, data) => {
@@ -95,9 +96,13 @@ const leavesApproveReject = async (req, res) => {
           if (err) {
             utilities.throwError(`Error updating leave id ${req.body.leaveId}`, 400);
           } else {
+            console.log("hi")
+            console.log(data)            
             if (data.affectedRows) {
+              console.log("hi2")
               return await returnLeaveOutput(req, res, data);
             } else {
+              console.log("hi3")
               return utilities.sendErrorResponse(res, "Leave Id not found", 400);
             }
           }
@@ -136,10 +141,13 @@ const returnLeaveOutput = async function (req, res, data) {
   let date = new Date(req.body.leave_start_date);
   let date2 = new Date(req.body.leave_end_date);
   let days = (date2.getTime() - date.getTime()) / (1000 * 3600 * 24);
+  console.log(days)
   if (req.body.status === "approved") {
+    console.log("bye")
     return updateApprovedLeave(days, req, res);
   } else {
     if (data.affectedRows) {
+      console.log("bye2")
       return utilities.sendSuccessResponse(res, data, "Data Updated");
     } else {
       return utilities.sendErrorResponse(res, "Failed to find leave id", 400);
@@ -152,6 +160,7 @@ const updateApprovedLeave = async (days, req, res) => {
     `update employee set num_of_leaves=num_of_leaves-${days} where emp_id='${req.body.employee_id}';`,
     (err2, data2) => {
       try {
+        console.log(err2,data2)
         if (err2) {
           utilities.throwError("Failed to deduct employee's leaves", 400);
         } else {
@@ -162,7 +171,7 @@ const updateApprovedLeave = async (days, req, res) => {
           }
         }
       } catch (e) {
-        return utilities.sendErrorResponse(res, "Some error occured", 400);
+        return utilities.sendErrorResponse(res, "Some error occured2", 400);
       }
     }
   );
