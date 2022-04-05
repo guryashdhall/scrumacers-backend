@@ -133,17 +133,12 @@ const returnLeaveOutput = async function (req, res, data) {
   console.log("func")    
   if (req.body.status === "approved") {
     console.log("func2")
-    let days=0
-    try{
-      req.body.leave_start_date = req.body.leave_start_date.split("-").join("/");
-      req.body.leave_end_date = req.body.leave_end_date.split("-").join("/");
-      let date = new Date(req.body.leave_start_date);
-      let date2 = new Date(req.body.leave_end_date);
-      let days = (date2.getTime() - date.getTime()) / (1000 * 3600 * 24);
-    }
-    catch(e){
-      console.log(e.message)
-    }
+    req.body.leave_start_date = req.body.leave_start_date.split("-").join("/");
+    req.body.leave_end_date = req.body.leave_end_date.split("-").join("/");
+    let date = new Date(req.body.leave_start_date);
+    let date2 = new Date(req.body.leave_end_date);
+    days = (date2.getTime() - date.getTime()) / (1000 * 3600 * 24);
+    console.log(days)
     
     console.log("bye")
     return updateApprovedLeave(days, req, res);
@@ -173,7 +168,7 @@ const updateApprovedLeave = async (days, req, res) => {
           }
         }
       } catch (e) {
-        return utilities.sendErrorResponse(res, "Some error occured2", 400);
+        return utilities.sendErrorResponse(res, "Some error occured", 400);
       }
     }
   );
