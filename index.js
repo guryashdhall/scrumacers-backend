@@ -31,6 +31,17 @@ app.use(function(req, res, next) {
 // Setting up Database Credentials based on Environment
 let db_credentials = {}
 
+if (process.env.NODE_ENV === 'production') {
+  db_credentials = {
+    host: "db-5308.cs.dal.ca",
+    user: process.env.DATABASE_PRODUCTION_USERNAME,
+    password: process.env.DATABASE_PRODUCTION_PASSWORD,
+    database: process.env.DATABASE_PRODUCTION_DATABASE,
+    port: "3306",
+    multipleStatements: true
+  }
+}
+
 if (process.env.NODE_ENV === 'development') {
   db_credentials = {
     host: "db-5308.cs.dal.ca",

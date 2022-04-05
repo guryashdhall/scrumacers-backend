@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "NODE_ENV=development nodemon index.js",
+    "start": "NODE_ENV=production nodemon index.js",
     "test": "NODE_ENV=testing nyc mocha ./test/* --timeout 40000 --exit && nyc report --reporter=lcov",
     "localtest": "set NODE_ENV=testing&& nyc mocha ./test/* --timeout 40000 --exit && nyc report --reporter=lcov",
     "localstart": "set NODE_ENV=development&& nodemon index.js"
