@@ -67,7 +67,6 @@ describe("POST api/user/login", () => {
   it("Testing for login", (done) => {
     data = {
       email: "emmabryan@gmail.com",
-
       password: "emmabryan5",
     };
 
@@ -77,9 +76,24 @@ describe("POST api/user/login", () => {
       .send(data)
       .end((err, res) => {
         res.should.have.status(200);
-
         res.body.should.have.property("message").eqls("login successfully");
-
+        done();
+      });
+  });
+  
+  it("Testing for login", (done) => {
+    let fail_condition='"emmabryan5"'
+    data = {
+      email: fail_condition,
+      password: "emmabryan5",
+    };
+    chai
+      .request(app)
+      .post("/api/user/login")
+      .send(data)
+      .end((err, res) => {
+        res.should.have.status(400);
+        res.body.should.have.property("message").eqls("Request failed");
         done();
       });
   });
@@ -100,9 +114,7 @@ describe("PUT api/user/logout", () => {
       .send(data)
       .end((err, res) => {
         res.should.have.status(200);
-
         res.body.should.have.property("message").eqls("Logout successful");
-
         done();
       });
   });
