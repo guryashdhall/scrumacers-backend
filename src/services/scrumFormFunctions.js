@@ -86,6 +86,7 @@ const fetchStandUpFormManager = async (req, res) => {
     }
 }
 
+// common function to return data for fetch form
 const returnFetchDataOutput = (err, data, res, errMessage) => {
     try {
         if (err) {
