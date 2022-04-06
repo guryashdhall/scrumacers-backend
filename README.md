@@ -7,7 +7,7 @@
 - Date Created: 05 Apr 2022
 - Last Modification Date: 05 Apr 2022
 - Git URL : Backend - https://git.cs.dal.ca/courses/2022-winter/csci-5308/group7
-- Git URL : Frontend - https://git.cs.dal.ca/golani/group7-frontend/-/tree/development
+- Git URL : Frontend - https://git.cs.dal.ca/golani/group7-frontend 
 - Heroku URL: https://scrum-acers-frontend.herokuapp.com/
 - Authors:
 
