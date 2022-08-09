@@ -6,8 +6,8 @@
 
 - Date Created: 05 Apr 2022
 - Last Modification Date: 05 Apr 2022
-- Git URL : Backend - https://git.cs.dal.ca/courses/2022-winter/csci-5308/group7
-- Git URL : Frontend - https://git.cs.dal.ca/golani/group7-frontend 
+- Git URL : Backend - https://github.com/guryashdhall/scrumacers-backend/
+- Git URL : Frontend - https://github.com/guryashdhall/scrumacers-frontend/ 
 - Heroku URL: https://scrum-acers-frontend.herokuapp.com/
 - Authors:
 
@@ -35,21 +35,21 @@ Node.js
 
 Clone the repository using following command (Backend)
 
-       ../Desktop> git clone https://git.cs.dal.ca/courses/2022-winter/csci-5308/group7 
+       ../Desktop> git clone https://github.com/guryashdhall/scrumacers-backend.git
 
 Clone the repository using following command (Frontend)
 
-       ../Desktop> git clone https://git.cs.dal.ca/golani/group7-frontend.git
+       ../Desktop> git clone https://github.com/guryashdhall/scrumacers-frontend.git
 
 Make sure you have cloned the repo, go inside the directory,
 
 For Backend,
 
-       ../Desktop> cd group7
+       ../Desktop> cd scrumacers-backend
 
 For Frontend,
 
-      ../Desktop> cd group7-frontend
+      ../Desktop> cd scrumacers-frontend
 
 Node Modules Installation<br/>
 Go to the project directory (frontend and backend) and run:
